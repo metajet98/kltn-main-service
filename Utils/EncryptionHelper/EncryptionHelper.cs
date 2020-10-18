@@ -1,7 +1,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
-using main_service.EFEntities.Users;
+using main_service.Databases;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;
 
@@ -32,7 +32,7 @@ namespace main_service.Utils.EncryptionHelper
             return new UserAuth
             {
                 Salt = salt,
-                HashPassword = hash
+                Hash = hash
             };
         }
 

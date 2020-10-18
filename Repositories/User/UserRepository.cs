@@ -1,12 +1,12 @@
-using main_service.EFEntities.Base;
+using main_service.Databases;
 using main_service.Repositories.Base;
 
 namespace main_service.Repositories.User
 {
-    public class UserRepository : BaseRepository<EFEntities.Users.User>
+    public class UserRepository : BaseRepository<Databases.User>
     {
         
-        public UserRepository(AppDbContext context) : base(context)
+        public UserRepository(AppDBContext context) : base(context)
         {
         }
     }

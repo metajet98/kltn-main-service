@@ -1,4 +1,4 @@
-using main_service.EFEntities.Users;
+using main_service.Databases;
 using main_service.Repositories.User;
 using main_service.RestApi.Response;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +22,7 @@ namespace main_service.Controllers
         {
             _userRepository.Insert(new User
             {
-                RoleId = 1,
+                Role = Constants.Role.Admin,
                 PhoneNumber = "0123456789"
             });
             

@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using main_service.EFEntities.Base;
+using main_service.Databases;
 using Microsoft.EntityFrameworkCore;
 
 namespace main_service.Repositories.Base
 {
-    public abstract class BaseRepository<TEntity> : IRepository <TEntity> where TEntity : BaseEntity
+    public abstract class BaseRepository<TEntity> : IRepository <TEntity> where TEntity : class
     {
-        protected readonly AppDbContext Context;
+        protected readonly AppDBContext Context;
         protected readonly DbSet<TEntity> DbSet;
 
-        public BaseRepository(AppDbContext context)
+        public BaseRepository(AppDBContext context)
         {
             Context = context;
             DbSet = context.Set<TEntity>();
@@ -72,13 +72,11 @@ namespace main_service.Repositories.Base
 
         public void Insert(TEntity entity)
         {
-            entity.CreatedDate = DateTime.Now;
             DbSet.Add(entity);
         }
 
         public void Update(TEntity entityToUpdate)
         {
-            entityToUpdate.ModifyDate = DateTime.Now;
             DbSet.Attach(entityToUpdate);
             Context.Entry(entityToUpdate).State = EntityState.Modified;
         }

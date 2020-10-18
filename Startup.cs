@@ -1,7 +1,5 @@
 using System.Text;
-using System.Threading.Tasks;
-using main_service.EFEntities;
-using main_service.EFEntities.Base;
+using main_service.Databases;
 using main_service.Repositories.Company;
 using main_service.Repositories.User;
 using main_service.Utils.EncryptionHelper;
@@ -28,7 +26,7 @@ namespace main_service
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddDbContext<AppDbContext>(options =>
+            services.AddDbContext<AppDBContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("MaintenanceSystem"));
             });
