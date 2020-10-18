@@ -1,0 +1,4 @@
+dotnet ef migrations add <migrate name>
+dotnet ef database update
+
+dotnet ef dbcontext scaffold "server=db-maintenance-system.czxyq53fjurd.ap-southeast-1.rds.amazonaws.com,1433;database=db-maintenance-system;User ID=admin;password=MYKMFiMEnyGkChNGE9Cr;" Microsoft.EntityFrameworkCore.SqlServer -f -d -o Databases -c AppDBContext

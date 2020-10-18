@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -18,6 +19,17 @@ namespace main_service
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<Startup>(); });
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    var configuration = new ConfigurationBuilder()
+                        .SetBasePath(Directory.GetCurrentDirectory())
+                        .AddJsonFile("appSettings.json", false, true)
+                        .Build();
+                    
+                    webBuilder.UseConfiguration(configuration);
+                    webBuilder.UseUrls("http://0.0.0.0:5001");
+                    webBuilder.UseKestrel();
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }

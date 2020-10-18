@@ -3,6 +3,24 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <RootNamespace>main_service</RootNamespace>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.8" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.8" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.8" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.8" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.8" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.8" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Databases" />
+      <Folder Include="Domains" />
+      <Folder Include="Extensions" />
+      <Folder Include="Repositories\Branch" />
+      <Folder Include="Repositories\FcmToken" />
+    </ItemGroup>
 
 </Project>
