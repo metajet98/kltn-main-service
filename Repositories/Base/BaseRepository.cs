@@ -60,7 +60,7 @@ namespace main_service.Repositories.Base
             }
         }
 
-        public TEntity GetById(object Id)
+        public TEntity? GetById(object Id)
         {
             return DbSet.Find(Id);
         }

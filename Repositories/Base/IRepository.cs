@@ -15,7 +15,7 @@ namespace main_service.Repositories.Base
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             string includeProperties = "");
 
-        TEntity GetById(object id);
+        TEntity? GetById(object id);
 
         IEnumerable<TEntity> GetWithRawSql(string query,
             params object[] parameters);

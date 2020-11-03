@@ -18,7 +18,7 @@ namespace main_service.Helpers
             return new JsonResult(response) {StatusCode = (int) HttpStatusCode.OK};
         }
         
-        public static JsonResult BadResponse(T data, object traceLog, string message = null, int statusCode = (int)HttpStatusCode.BadRequest)
+        public static JsonResult BadResponse(T data, string message = null, object traceLog = null, int statusCode = (int)HttpStatusCode.BadRequest)
         {
             var response = new
             {
@@ -28,7 +28,20 @@ namespace main_service.Helpers
                 StatusCode = statusCode,
                 TraceLog = traceLog,
             };
-            return new JsonResult(response) {StatusCode = (int) HttpStatusCode.OK};
+            return new JsonResult(response) {StatusCode = (int) HttpStatusCode.BadRequest};
+        }
+        
+        public static JsonResult UnauthorizedResponse(T data, string message = null, object traceLog = null, int statusCode = (int)HttpStatusCode.Unauthorized)
+        {
+            var response = new
+            {
+                Data = data,
+                Message = message,
+                IsSuccess = false,
+                StatusCode = statusCode,
+                TraceLog = traceLog,
+            };
+            return new JsonResult(response) {StatusCode = (int) HttpStatusCode.Unauthorized};
         }
     }
 }

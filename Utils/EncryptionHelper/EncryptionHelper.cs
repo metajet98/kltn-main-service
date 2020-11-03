@@ -1,26 +1,39 @@
 using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using JWT.Algorithms;
+using JWT.Builder;
+using JWT.Exceptions;
 using main_service.Databases;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace main_service.Utils.EncryptionHelper
 {
     public class EncryptionHelper : IEncryptionHelper
     {
         const string Valid = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-        private readonly string _secretCode;
+        private readonly string _passwordPepper;
+        private readonly string _jwtSecretCode;
+        private readonly int _accessTokenExpireTime;
+        private readonly int _refreshTokenExpireTime;
         
         public EncryptionHelper(IConfiguration configuration)
         {
-            _secretCode = configuration.GetSection("Auth:PasswordSalt").Value;
+            _passwordPepper = configuration.GetSection("Auth:PasswordPepper").Value;
+            _jwtSecretCode = configuration.GetSection("Auth:JwtSecretCode").Value;
+            _accessTokenExpireTime = int.Parse(configuration.GetSection("Auth:AccessTokenExpireTime").Value);
+            _refreshTokenExpireTime = int.Parse(configuration.GetSection("Auth:RefreshTokenExpireTime").Value);
         }
 
-        public UserAuth HashPassword(string password)
+        public UserAuth HashPassword(string password, int userId)
         {
             var salt = GetRandomString(16);
-            byte[] paper = Encoding.ASCII.GetBytes(_secretCode + salt);
+            byte[] paper = Encoding.ASCII.GetBytes(_passwordPepper + salt);
             var hash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                     password: password,
                     salt: paper,
@@ -32,13 +45,15 @@ namespace main_service.Utils.EncryptionHelper
             return new UserAuth
             {
                 Salt = salt,
-                Hash = hash
+                Hash = hash,
+                UserId = userId,
+                CreatedDate = DateTime.Now
             };
         }
 
         public bool ValidatePassword(string password, string hash, string salt)
         {
-            byte[] paper = Encoding.ASCII.GetBytes(_secretCode + salt);
+            byte[] paper = Encoding.ASCII.GetBytes(_passwordPepper + salt);
             var checkingHash = Convert.ToBase64String(KeyDerivation.Pbkdf2(
                     password: password,
                     salt: paper,
@@ -48,6 +63,60 @@ namespace main_service.Utils.EncryptionHelper
                 )
             );
             return hash.Equals(checkingHash);
+        }
+        
+        public string GenerateAccessToken(int userId, string role)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtSecretCode);
+            var listClaim = new List<Claim> {new Claim(ClaimTypes.Name, userId.ToString()), new Claim(ClaimTypes.Role, role)};
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(listClaim),
+                Expires = DateTime.UtcNow.AddHours(_accessTokenExpireTime),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+        
+        public string GenerateRefreshToken(int userId)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_jwtSecretCode);
+            var listClaim = new List<Claim> {new Claim(ClaimTypes.Name, userId.ToString())};
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(listClaim),
+                Expires = DateTime.UtcNow.AddHours(_refreshTokenExpireTime),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);        
+        }
+        public IDictionary<string, object>? VerifyToken(string token)
+        {
+            try
+            {
+                var payload = new JwtBuilder()
+                    .WithAlgorithm(new HMACSHA256Algorithm())
+                    .WithSecret(_jwtSecretCode)
+                    .MustVerifySignature()
+                    .Decode<IDictionary<string, object>>(token);
+
+                return payload;
+            }
+            catch (TokenExpiredException)
+            {
+                return null;
+            }
+            catch (SignatureVerificationException)
+            {
+                return null;
+            }
         }
         
         private string GetRandomString(int length)

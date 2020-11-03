@@ -16,6 +16,8 @@ namespace main_service
 {
     public class Startup
     {
+        readonly string myAllowAllOrigins = "_myAllowAllOrigins";
+
         private IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
@@ -25,7 +27,20 @@ namespace main_service
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: myAllowAllOrigins,
+                    builder => { 
+                        builder
+                            .AllowAnyOrigin()
+                            .AllowAnyHeader()
+                            .AllowAnyMethod(); 
+                    });
+            });
+            
+            services.AddControllers().AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
             services.AddDbContext<AppDBContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("MaintenanceSystem"));
@@ -55,6 +70,7 @@ namespace main_service
             
             services.AddScoped<UserRepository>();
             services.AddScoped<CompanyRepository>();
+            services.AddScoped<UserAuthRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -63,6 +79,8 @@ namespace main_service
             {
                 app.UseDeveloperExceptionPage();
             }
+            
+            app.UseCors(myAllowAllOrigins);
 
             app.UseRouting();
             app.UseAuthentication();
