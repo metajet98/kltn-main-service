@@ -19,10 +19,10 @@ namespace main_service.Databases
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
-        public int VehicleTypeId { get; set; }
-        public int VehicleCompanyId { get; set; }
-        public int Capacity { get; set; }
-        public string Image { get; set; }
+        public int? VehicleTypeId { get; set; }
+        public int? VehicleCompanyId { get; set; }
+        public int? Capacity { get; set; }
+        public string? Image { get; set; }
 
         [ForeignKey(nameof(VehicleCompanyId))]
         [InverseProperty("VehicleGroup")]

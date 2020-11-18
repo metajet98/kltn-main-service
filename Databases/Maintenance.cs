@@ -16,16 +16,16 @@ namespace main_service.Databases
 
         [Key]
         public int Id { get; set; }
-        public int UserVehicleId { get; set; }
-        public string Notes { get; set; }
-        public int MaintenanceStaffId { get; set; }
-        public int ReceptionStaffId { get; set; }
-        public int Odometer { get; set; }
+        public int? UserVehicleId { get; set; }
+        public string? Notes { get; set; }
+        public int? MaintenanceStaffId { get; set; }
+        public int? ReceptionStaffId { get; set; }
+        public int? Odometer { get; set; }
         [Column(TypeName = "datetime")]
-        public DateTime CreatedDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? ModifyDate { get; set; }
-        public int BranchId { get; set; }
+        public int? BranchId { get; set; }
 
         [ForeignKey(nameof(BranchId))]
         [InverseProperty("Maintenance")]

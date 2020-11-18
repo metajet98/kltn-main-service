@@ -17,7 +17,7 @@ namespace main_service.Databases
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
-        public string Logo { get; set; }
+        public string? Logo { get; set; }
 
         [InverseProperty("VehicleCompany")]
         public virtual ICollection<VehicleGroup> VehicleGroup { get; set; }

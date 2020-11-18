@@ -15,11 +15,11 @@ namespace main_service.Databases
 
         [Key]
         public int Id { get; set; }
-        public int VehicleGroupId { get; set; }
+        public int? VehicleGroupId { get; set; }
         [Required]
         [StringLength(50)]
         public string Name { get; set; }
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [ForeignKey(nameof(VehicleGroupId))]
         [InverseProperty("MaintenanceItem")]

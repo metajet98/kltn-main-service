@@ -10,10 +10,10 @@ namespace main_service.Databases
     {
         [Key]
         public int Id { get; set; }
-        public int BranchMaintenanceItemPriceId { get; set; }
-        public int Quantity { get; set; }
-        public int TotalPrice { get; set; }
-        public int MaintenanceId { get; set; }
+        public int? BranchMaintenanceItemPriceId { get; set; }
+        public int? Quantity { get; set; }
+        public int? TotalPrice { get; set; }
+        public int? MaintenanceId { get; set; }
 
         [ForeignKey(nameof(BranchMaintenanceItemPriceId))]
         [InverseProperty("MaintenanceBill")]

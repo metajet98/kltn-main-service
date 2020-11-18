@@ -15,12 +15,12 @@ namespace main_service.Databases
 
         [Key]
         public int Id { get; set; }
-        public int BranchId { get; set; }
-        public int MaintenanceItemId { get; set; }
-        public int LaborCost { get; set; }
-        public int SparePartPrice { get; set; }
+        public int? BranchId { get; set; }
+        public int? MaintenanceItemId { get; set; }
+        public int? LaborCost { get; set; }
+        public int? SparePartPrice { get; set; }
         [Column(TypeName = "datetime")]
-        public DateTime CreatedDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? ModifyDate { get; set; }
 

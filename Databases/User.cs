@@ -27,12 +27,12 @@ namespace main_service.Databases
         [StringLength(10)]
         public string PhoneNumber { get; set; }
         [StringLength(50)]
-        public string Email { get; set; }
-        public string Address { get; set; }
+        public string? Email { get; set; }
+        public string? Address { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? Birthday { get; set; }
         [Column(TypeName = "datetime")]
-        public DateTime CreatedDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? ModifyDate { get; set; }
         [Required]

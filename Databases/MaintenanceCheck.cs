@@ -10,9 +10,9 @@ namespace main_service.Databases
     {
         [Key]
         public int Id { get; set; }
-        public int MaintenanceId { get; set; }
-        public int StatusId { get; set; }
-        public int SparePartItemId { get; set; }
+        public int? MaintenanceId { get; set; }
+        public int? StatusId { get; set; }
+        public int? SparePartItemId { get; set; }
 
         [ForeignKey(nameof(MaintenanceId))]
         [InverseProperty("MaintenanceCheck")]

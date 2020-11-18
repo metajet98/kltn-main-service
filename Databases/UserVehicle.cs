@@ -16,17 +16,17 @@ namespace main_service.Databases
 
         [Key]
         public int Id { get; set; }
-        public int UserId { get; set; }
-        public int VehicleGroupId { get; set; }
+        public int? UserId { get; set; }
+        public int? VehicleGroupId { get; set; }
         [StringLength(50)]
-        public string ChassisNumber { get; set; }
+        public string? ChassisNumber { get; set; }
         [StringLength(50)]
-        public string EngineNumber { get; set; }
+        public string? EngineNumber { get; set; }
         [Required]
         [StringLength(20)]
         public string PlateNumber { get; set; }
         [StringLength(20)]
-        public string Color { get; set; }
+        public string? Color { get; set; }
 
         [ForeignKey(nameof(UserId))]
         [InverseProperty("UserVehicle")]
