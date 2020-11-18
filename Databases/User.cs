@@ -26,9 +26,8 @@ namespace main_service.Databases
         [Required]
         [StringLength(10)]
         public string PhoneNumber { get; set; }
-        [StringLength(20)]
-        public string Email { get; set; }
         [StringLength(50)]
+        public string Email { get; set; }
         public string Address { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? Birthday { get; set; }

@@ -1,6 +1,5 @@
 using System;
-using main_service.Databases;
-using main_service.Repositories.User;
+using main_service.Repositories;
 using main_service.RestApi.Response;
 using main_service.Utils.EncryptionHelper;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +26,7 @@ namespace main_service.Controllers
         [Route("")]
         public JsonResult Post()
         {
-            var newUser = new User
+            var newUser = new Databases.User
             {
                 Role = Constants.Role.CenterManager,
                 PhoneNumber = "0123456789",

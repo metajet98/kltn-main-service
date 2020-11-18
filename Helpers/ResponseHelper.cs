@@ -18,7 +18,7 @@ namespace main_service.Helpers
             return new JsonResult(response) {StatusCode = (int) HttpStatusCode.OK};
         }
         
-        public static JsonResult BadResponse(T data, string message = null, object traceLog = null, int statusCode = (int)HttpStatusCode.BadRequest)
+        public static JsonResult ErrorResponse(T data, string message = null, object traceLog = null, int statusCode = (int)HttpStatusCode.BadRequest)
         {
             var response = new
             {

@@ -23,12 +23,13 @@ namespace main_service.Databases
         [Required]
         [StringLength(50)]
         public string Address { get; set; }
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
         [Column(TypeName = "datetime")]
-        public DateTime CreatedDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? ModifyDate { get; set; }
+        public string? Logo { get; set; }
 
         [InverseProperty("Branch")]
         public virtual ICollection<BranchMaintenanceItemPrice> BranchMaintenanceItemPrice { get; set; }

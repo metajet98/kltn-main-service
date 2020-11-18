@@ -1,11 +1,12 @@
+using System;
 using main_service.Helpers;
-using main_service.Repositories.User;
+using main_service.Repositories;
 using main_service.RestApi.Requests;
 using main_service.RestApi.Response;
 using main_service.Utils.EncryptionHelper;
 using Microsoft.AspNetCore.Mvc;
 
-namespace main_service.Controllers
+namespace main_service.Controllers.Auth
 {
     public class AuthController : ControllerBase
     {
@@ -25,7 +26,7 @@ namespace main_service.Controllers
             var user = _userRepository.FindByPhoneNumber(authRequest.PhoneNumber);
             if (user == null)
             {
-                return ResponseHelper<string>.BadResponse(null, null, "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
+                return ResponseHelper<string>.ErrorResponse(null, null, "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
             }
 
             var isPasswordCorrect = _encryptionHelper.ValidatePassword(authRequest.Password, user.UserAuth.Hash, user.UserAuth.Salt);
@@ -38,32 +39,42 @@ namespace main_service.Controllers
                 });
             }
 
-            return ResponseHelper<string>.BadResponse(null, "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
+            return ResponseHelper<string>.ErrorResponse(null, "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
         }
         
         [HttpPost]
-        [Route("/refresh")]
+        [Route("/api/token/refresh")]
         public JsonResult RefreshToken([FromBody] RefreshTokenRequest request)
         {
-            var payLoad = _encryptionHelper.VerifyToken(request.RefreshToken);
-            if (payLoad == null)
+            try
+            {
+                var payLoad = _encryptionHelper.VerifyToken(request.RefreshToken);
+                if (payLoad == null)
+                {
+                    return ResponseHelper<string>.UnauthorizedResponse(null,
+                        "Refresh Token không hợp lệ hoặc đã hết hạn");
+                }
+
+                int.TryParse(payLoad["unique_name"].ToString(), out var userId);
+                var user = _userRepository.GetById(userId);
+
+                if (user == null)
+                {
+                    return ResponseHelper<string>.UnauthorizedResponse(null,
+                        "Refresh Token không hợp lệ hoặc đã hết hạn");
+                }
+
+                return new JsonResult(new AuthResponse
+                {
+                    AccessToken = _encryptionHelper.GenerateAccessToken(user.Id, user.Role),
+                    RefreshToken = _encryptionHelper.GenerateRefreshToken(user.Id)
+                });
+            }
+            catch (Exception)
             {
                 return ResponseHelper<string>.UnauthorizedResponse(null, "Refresh Token không hợp lệ hoặc đã hết hạn");
             }
-
-            int.TryParse(payLoad["unique_name"].ToString(), out var userId);
-            var user = _userRepository.GetById(userId);
-
-            if (user == null)
-            {
-                return ResponseHelper<string>.UnauthorizedResponse(null, "Refresh Token không hợp lệ hoặc đã hết hạn");
-            }
-
-            return new JsonResult(new AuthResponse
-            {
-                AccessToken = _encryptionHelper.GenerateAccessToken(user.Id, user.Role),
-                RefreshToken = _encryptionHelper.GenerateRefreshToken(user.Id)
-            });
+            
         }
         
         // [HttpPatch]

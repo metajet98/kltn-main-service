@@ -3,7 +3,7 @@ using main_service.Databases;
 using main_service.Repositories.Base;
 using Microsoft.EntityFrameworkCore;
 
-namespace main_service.Repositories.User
+namespace main_service.Repositories
 {
     public class UserRepository : BaseRepository<Databases.User>
     {

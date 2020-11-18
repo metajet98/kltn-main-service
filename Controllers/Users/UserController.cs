@@ -1,12 +1,14 @@
 using System;
+using System.Collections.Generic;
 using main_service.Databases;
 using main_service.Helpers;
-using main_service.Repositories.User;
+using main_service.Repositories;
 using main_service.RestApi.Requests;
 using main_service.Utils.EncryptionHelper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace main_service.Controllers
+namespace main_service.Controllers.Users
 {
     [Route("/user")]
     public class UserController : ControllerBase
@@ -21,6 +23,8 @@ namespace main_service.Controllers
             _userAuthRepository = userAuthRepository;
             _encryptionHelper = encryptionHelper;
         }
+        
+        [HttpPost]
         public JsonResult Create([FromBody] UserRequest userRequest)
         {
             var newUser = new User
@@ -40,6 +44,23 @@ namespace main_service.Controllers
             _userAuthRepository.Save();
             
             return ResponseHelper<string>.OkResponse(null, "Tạo tài khoản thành công!");
+        }
+
+        [HttpGet]
+        [Authorize(Roles = Constants.Role.CenterManager)]
+        public JsonResult GetAll()
+        {
+            var users = _userRepository.Get();
+            return ResponseHelper<IEnumerable<User>>.OkResponse(users);
+        }
+        
+        [HttpGet]
+        [Route("{userId}")]
+        [Authorize(Roles = Constants.Role.CenterManager)]
+        public JsonResult Get(int userId)
+        {
+            var user = _userRepository.GetById(userId);
+            return ResponseHelper<User>.OkResponse(user);
         }
     }
 }

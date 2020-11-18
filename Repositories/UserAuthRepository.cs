@@ -2,7 +2,7 @@ using System.Linq;
 using main_service.Databases;
 using main_service.Repositories.Base;
 
-namespace main_service.Repositories.User
+namespace main_service.Repositories
 {
     public class UserAuthRepository : BaseRepository<UserAuth>
     {

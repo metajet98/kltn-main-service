@@ -1,7 +1,7 @@
 using System.Text;
 using main_service.Databases;
-using main_service.Repositories.Company;
-using main_service.Repositories.User;
+using main_service.Repositories;
+using main_service.Storage;
 using main_service.Utils.EncryptionHelper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -67,10 +67,15 @@ namespace main_service
                 });
             services.AddAuthorization();
             services.AddSingleton<IEncryptionHelper, EncryptionHelper>();
+            services.AddSingleton<StorageManager>();
             
             services.AddScoped<UserRepository>();
             services.AddScoped<CompanyRepository>();
+            services.AddScoped<VehicleTypeRepository>();
+            services.AddScoped<VehicleGroupRepository>();
             services.AddScoped<UserAuthRepository>();
+            services.AddScoped<UserVehicleRepository>();
+            services.AddScoped<BranchRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
