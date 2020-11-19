@@ -5,17 +5,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace main_service.Databases
 {
-    [Table("MAINTENANCE_CHECK")]
-    public partial class MaintenanceCheck
+    [Table("SPAREPART_CHECK_DETAIL")]
+    public partial class SparepartCheckDetail
     {
         [Key]
         public int Id { get; set; }
-        public int? MaintenanceId { get; set; }
-        public int? StatusId { get; set; }
-        public int? SparePartItemId { get; set; }
+        public int MaintenanceId { get; set; }
+        public int StatusId { get; set; }
+        public int SparePartItemId { get; set; }
 
         [ForeignKey(nameof(MaintenanceId))]
-        [InverseProperty("MaintenanceCheck")]
+        [InverseProperty("SparepartCheckDetail")]
         public virtual Maintenance Maintenance { get; set; }
         [ForeignKey(nameof(SparePartItemId))]
         [InverseProperty(nameof(VehicleGroupSparepartItem.SparepartCheckDetail))]

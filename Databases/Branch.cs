@@ -10,7 +10,7 @@ namespace main_service.Databases
     {
         public Branch()
         {
-            BranchMaintenanceItemPrice = new HashSet<BranchMaintenanceItemPrice>();
+            BranchServicePrice = new HashSet<BranchServicePrice>();
             BranchStaff = new HashSet<BranchStaff>();
             Maintenance = new HashSet<Maintenance>();
         }
@@ -21,7 +21,6 @@ namespace main_service.Databases
         [StringLength(30)]
         public string Name { get; set; }
         [Required]
-        [StringLength(50)]
         public string Address { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
@@ -32,7 +31,7 @@ namespace main_service.Databases
         public string? Logo { get; set; }
 
         [InverseProperty("Branch")]
-        public virtual ICollection<BranchMaintenanceItemPrice> BranchMaintenanceItemPrice { get; set; }
+        public virtual ICollection<BranchServicePrice> BranchServicePrice { get; set; }
         [InverseProperty("Branch")]
         public virtual ICollection<BranchStaff> BranchStaff { get; set; }
         [InverseProperty("Branch")]

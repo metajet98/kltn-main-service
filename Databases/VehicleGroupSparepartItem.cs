@@ -10,7 +10,7 @@ namespace main_service.Databases
     {
         public VehicleGroupSparepartItem()
         {
-            MaintenanceCheck = new HashSet<MaintenanceCheck>();
+            SparepartCheckDetail = new HashSet<SparepartCheckDetail>();
         }
 
         [Key]
@@ -25,6 +25,6 @@ namespace main_service.Databases
         [InverseProperty("VehicleGroupSparepartItem")]
         public virtual VehicleGroup VehicleGroup { get; set; }
         [InverseProperty("SparePartItem")]
-        public virtual ICollection<MaintenanceCheck> MaintenanceCheck { get; set; }
+        public virtual ICollection<SparepartCheckDetail> SparepartCheckDetail { get; set; }
     }
 }

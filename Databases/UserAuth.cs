@@ -16,7 +16,7 @@ namespace main_service.Databases
         [Required]
         public string Hash { get; set; }
         [Column(TypeName = "datetime")]
-        public DateTime? CreatedDate { get; set; }
+        public DateTime CreatedDate { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? ModifyDate { get; set; }
 

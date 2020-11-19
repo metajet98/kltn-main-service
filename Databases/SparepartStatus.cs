@@ -10,7 +10,7 @@ namespace main_service.Databases
     {
         public SparepartStatus()
         {
-            MaintenanceCheck = new HashSet<MaintenanceCheck>();
+            SparepartCheckDetail = new HashSet<SparepartCheckDetail>();
         }
 
         [Key]
@@ -23,6 +23,6 @@ namespace main_service.Databases
         public string Acronym { get; set; }
 
         [InverseProperty("Status")]
-        public virtual ICollection<MaintenanceCheck> MaintenanceCheck { get; set; }
+        public virtual ICollection<SparepartCheckDetail> SparepartCheckDetail { get; set; }
     }
 }

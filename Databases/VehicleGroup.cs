@@ -10,7 +10,7 @@ namespace main_service.Databases
     {
         public VehicleGroup()
         {
-            MaintenanceItem = new HashSet<MaintenanceItem>();
+            MaintenanceService = new HashSet<MaintenanceService>();
             UserVehicle = new HashSet<UserVehicle>();
             VehicleGroupSparepartItem = new HashSet<VehicleGroupSparepartItem>();
         }
@@ -31,7 +31,7 @@ namespace main_service.Databases
         [InverseProperty("VehicleGroup")]
         public virtual VehicleType VehicleType { get; set; }
         [InverseProperty("VehicleGroup")]
-        public virtual ICollection<MaintenanceItem> MaintenanceItem { get; set; }
+        public virtual ICollection<MaintenanceService> MaintenanceService { get; set; }
         [InverseProperty("VehicleGroup")]
         public virtual ICollection<UserVehicle> UserVehicle { get; set; }
         [InverseProperty("VehicleGroup")]

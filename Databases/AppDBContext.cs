@@ -16,15 +16,15 @@ namespace main_service.Databases
         }
 
         public virtual DbSet<Branch> Branch { get; set; }
-        public virtual DbSet<BranchMaintenanceItemPrice> BranchMaintenanceItemPrice { get; set; }
+        public virtual DbSet<BranchServicePrice> BranchServicePrice { get; set; }
         public virtual DbSet<BranchStaff> BranchStaff { get; set; }
         public virtual DbSet<FcmToken> FcmToken { get; set; }
         public virtual DbSet<Maintenance> Maintenance { get; set; }
-        public virtual DbSet<MaintenanceBill> MaintenanceBill { get; set; }
-        public virtual DbSet<MaintenanceCheck> MaintenanceCheck { get; set; }
-        public virtual DbSet<MaintenanceItem> MaintenanceItem { get; set; }
+        public virtual DbSet<MaintenanceBillDetail> MaintenanceBillDetail { get; set; }
         public virtual DbSet<MaintenanceSchedule> MaintenanceSchedule { get; set; }
+        public virtual DbSet<MaintenanceService> MaintenanceService { get; set; }
         public virtual DbSet<Notification> Notification { get; set; }
+        public virtual DbSet<SparepartCheckDetail> SparepartCheckDetail { get; set; }
         public virtual DbSet<SparepartStatus> SparepartStatus { get; set; }
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<UserAuth> UserAuth { get; set; }
@@ -56,7 +56,7 @@ namespace main_service.Databases
                     .IsUnique();
             });
 
-            modelBuilder.Entity<BranchMaintenanceItemPrice>(entity =>
+            modelBuilder.Entity<BranchServicePrice>(entity =>
             {
                 entity.HasKey(e => e.Id)
                     .HasName("BRANCH_MAINTENANCE_ITEM_PRICE_pk")
@@ -67,14 +67,14 @@ namespace main_service.Databases
                     .IsUnique();
 
                 entity.HasOne(d => d.Branch)
-                    .WithMany(p => p.BranchMaintenanceItemPrice)
+                    .WithMany(p => p.BranchServicePrice)
                     .HasForeignKey(d => d.BranchId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("BRANCH_MAINTENANCE_ITEM_PRICE_BRANCH_Id_fk");
 
-                entity.HasOne(d => d.MaintenanceItem)
-                    .WithMany(p => p.BranchMaintenanceItemPrice)
-                    .HasForeignKey(d => d.MaintenanceItemId)
+                entity.HasOne(d => d.MaintenanceService)
+                    .WithMany(p => p.BranchServicePrice)
+                    .HasForeignKey(d => d.MaintenanceServiceId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("BRANCH_MAINTENANCE_ITEM_PRICE_MAINTENANCE_ITEM_Id_fk");
             });
@@ -150,7 +150,7 @@ namespace main_service.Databases
                     .HasConstraintName("MAINTENANCE_USER_VEHICLE_Id_fk");
             });
 
-            modelBuilder.Entity<MaintenanceBill>(entity =>
+            modelBuilder.Entity<MaintenanceBillDetail>(entity =>
             {
                 entity.HasKey(e => e.Id)
                     .HasName("MAINTENANCE_BILL_pk")
@@ -160,63 +160,17 @@ namespace main_service.Databases
                     .HasName("MAINTENANCE_BILL_Id_uindex")
                     .IsUnique();
 
-                entity.HasOne(d => d.BranchMaintenanceItemPrice)
-                    .WithMany(p => p.MaintenanceBill)
-                    .HasForeignKey(d => d.BranchMaintenanceItemPriceId)
+                entity.HasOne(d => d.BranchServicePrice)
+                    .WithMany(p => p.MaintenanceBillDetail)
+                    .HasForeignKey(d => d.BranchServicePriceId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("MAINTENANCE_BILL_BRANCH_MAINTENANCE_ITEM_PRICE_Id_fk");
 
                 entity.HasOne(d => d.Maintenance)
-                    .WithMany(p => p.MaintenanceBill)
+                    .WithMany(p => p.MaintenanceBillDetail)
                     .HasForeignKey(d => d.MaintenanceId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("MAINTENANCE_BILL_MAINTENANCE_Id_fk");
-            });
-
-            modelBuilder.Entity<MaintenanceCheck>(entity =>
-            {
-                entity.HasKey(e => e.Id)
-                    .HasName("MAINTENANCE_CHECK_pk")
-                    .IsClustered(false);
-
-                entity.HasIndex(e => e.Id)
-                    .HasName("MAINTENANCE_CHECK_Id_uindex")
-                    .IsUnique();
-
-                entity.HasOne(d => d.Maintenance)
-                    .WithMany(p => p.MaintenanceCheck)
-                    .HasForeignKey(d => d.MaintenanceId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("MAINTENANCE_CHECK_MAINTENANCE_Id_fk");
-
-                entity.HasOne(d => d.SparePartItem)
-                    .WithMany(p => p.MaintenanceCheck)
-                    .HasForeignKey(d => d.SparePartItemId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("MAINTENANCE_CHECK_VEHICLE_GROUP_SPAREPART_ITEM_Id_fk");
-
-                entity.HasOne(d => d.Status)
-                    .WithMany(p => p.MaintenanceCheck)
-                    .HasForeignKey(d => d.StatusId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("MAINTENANCE_CHECK_SPAREPART_STATUS_Id_fk");
-            });
-
-            modelBuilder.Entity<MaintenanceItem>(entity =>
-            {
-                entity.HasKey(e => e.Id)
-                    .HasName("MAINTENANCE_ITEM_pk")
-                    .IsClustered(false);
-
-                entity.HasIndex(e => e.Id)
-                    .HasName("MAINTENANCE_ITEM_Id_uindex")
-                    .IsUnique();
-
-                entity.HasOne(d => d.VehicleGroup)
-                    .WithMany(p => p.MaintenanceItem)
-                    .HasForeignKey(d => d.VehicleGroupId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("MAINTENANCE_ITEM_VEHICLE_GROUP_Id_fk");
             });
 
             modelBuilder.Entity<MaintenanceSchedule>(entity =>
@@ -236,6 +190,23 @@ namespace main_service.Databases
                     .HasConstraintName("MAINTENANCE_SCHEDULE_USER_VEHICLE_Id_fk");
             });
 
+            modelBuilder.Entity<MaintenanceService>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("MAINTENANCE_ITEM_pk")
+                    .IsClustered(false);
+
+                entity.HasIndex(e => e.Id)
+                    .HasName("MAINTENANCE_ITEM_Id_uindex")
+                    .IsUnique();
+
+                entity.HasOne(d => d.VehicleGroup)
+                    .WithMany(p => p.MaintenanceService)
+                    .HasForeignKey(d => d.VehicleGroupId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("MAINTENANCE_ITEM_VEHICLE_GROUP_Id_fk");
+            });
+
             modelBuilder.Entity<Notification>(entity =>
             {
                 entity.HasKey(e => e.Id)
@@ -251,6 +222,35 @@ namespace main_service.Databases
                     .HasForeignKey(d => d.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("NOTIFICATION_USER_Id_fk");
+            });
+
+            modelBuilder.Entity<SparepartCheckDetail>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("MAINTENANCE_CHECK_pk")
+                    .IsClustered(false);
+
+                entity.HasIndex(e => e.Id)
+                    .HasName("MAINTENANCE_CHECK_Id_uindex")
+                    .IsUnique();
+
+                entity.HasOne(d => d.Maintenance)
+                    .WithMany(p => p.SparepartCheckDetail)
+                    .HasForeignKey(d => d.MaintenanceId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("MAINTENANCE_CHECK_MAINTENANCE_Id_fk");
+
+                entity.HasOne(d => d.SparePartItem)
+                    .WithMany(p => p.SparepartCheckDetail)
+                    .HasForeignKey(d => d.SparePartItemId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("MAINTENANCE_CHECK_VEHICLE_GROUP_SPAREPART_ITEM_Id_fk");
+
+                entity.HasOne(d => d.Status)
+                    .WithMany(p => p.SparepartCheckDetail)
+                    .HasForeignKey(d => d.StatusId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("MAINTENANCE_CHECK_SPAREPART_STATUS_Id_fk");
             });
 
             modelBuilder.Entity<SparepartStatus>(entity =>
