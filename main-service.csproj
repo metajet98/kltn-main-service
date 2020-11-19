@@ -20,6 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Controllers\Maintenances" />
       <Folder Include="Databases" />
       <Folder Include="Domains" />
     </ItemGroup>

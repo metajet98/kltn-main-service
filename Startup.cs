@@ -76,6 +76,8 @@ namespace main_service
             services.AddScoped<UserAuthRepository>();
             services.AddScoped<UserVehicleRepository>();
             services.AddScoped<BranchRepository>();
+            services.AddScoped<SparePartRepository>();
+            services.AddScoped<SparePartCheckingStatusRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
