@@ -48,7 +48,7 @@ namespace main_service.Controllers.SpareParts
         }
         
         [HttpGet]
-        [Route("{vehicleGroupId}/spare-part")]
+        [Route("vehicle-group/{vehicleGroupId}/spare-part")]
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult GetVehicleSparePart(int vehicleGroupId)
         {
@@ -57,7 +57,7 @@ namespace main_service.Controllers.SpareParts
         }
         
         [HttpPost]
-        [Route("{vehicleGroupId}/spare-part")]
+        [Route("vehicle-group/{vehicleGroupId}/spare-part")]
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult CreateVehicleSparePart([FromBody] SparePartRequest request, int vehicleGroupId)
         {
@@ -73,7 +73,7 @@ namespace main_service.Controllers.SpareParts
         }
         
         [HttpDelete]
-        [Route("{vehicleGroupId}/spare-part/{id}")]
+        [Route("spare-part/{id}")]
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult DeleteVehicleSparePart(int id)
         {

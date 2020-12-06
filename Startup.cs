@@ -78,6 +78,8 @@ namespace main_service
             services.AddScoped<BranchRepository>();
             services.AddScoped<SparePartRepository>();
             services.AddScoped<SparePartCheckingStatusRepository>();
+            services.AddScoped<MaintenanceServiceRepository>();
+            services.AddScoped<BranchServicePriceRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
