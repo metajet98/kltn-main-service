@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using main_service.Databases;
+using main_service.RestApi.Response;
 
 namespace main_service.Utils.EncryptionHelper
 {
@@ -8,8 +9,7 @@ namespace main_service.Utils.EncryptionHelper
     {
         public UserAuth HashPassword(string password, int userId);
         public bool ValidatePassword(string password, string hash, string salt);
-        public string GenerateAccessToken(int userId, string role);
-        public string GenerateRefreshToken(int userId);
+        public AuthResponse GenerateToken(int userId, string role);
         public IDictionary<string, object>? VerifyToken(string token);
     }
 }

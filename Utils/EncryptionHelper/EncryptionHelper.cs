@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -8,6 +9,7 @@ using JWT.Algorithms;
 using JWT.Builder;
 using JWT.Exceptions;
 using main_service.Databases;
+using main_service.RestApi.Response;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -65,37 +67,33 @@ namespace main_service.Utils.EncryptionHelper
             return hash.Equals(checkingHash);
         }
         
-        public string GenerateAccessToken(int userId, string role)
+        public AuthResponse GenerateToken(int userId, string role)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtSecretCode);
-            var listClaim = new List<Claim> {new Claim(ClaimTypes.Name, userId.ToString()), new Claim(ClaimTypes.Role, role)};
-            var tokenDescriptor = new SecurityTokenDescriptor
+            var listAccessTokenClaim = new List<Claim> {new Claim(ClaimTypes.Name, userId.ToString()), new Claim(ClaimTypes.Role, role)};
+            var listRefreshTokenClaim = new List<Claim> {new Claim(ClaimTypes.Name, userId.ToString())};
+            var accessTokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(listClaim),
+                Subject = new ClaimsIdentity(listAccessTokenClaim),
                 Expires = DateTime.UtcNow.AddHours(_accessTokenExpireTime),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
-            
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
-        
-        public string GenerateRefreshToken(int userId)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_jwtSecretCode);
-            var listClaim = new List<Claim> {new Claim(ClaimTypes.Name, userId.ToString())};
-
-            var tokenDescriptor = new SecurityTokenDescriptor
+            var refreshTokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(listClaim),
+                Subject = new ClaimsIdentity(listRefreshTokenClaim),
                 Expires = DateTime.UtcNow.AddHours(_refreshTokenExpireTime),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);        
+            var accessToken = tokenHandler.CreateToken(accessTokenDescriptor);
+            var refreshToken = tokenHandler.CreateToken(refreshTokenDescriptor);
+            return new AuthResponse
+            {
+                AccessToken = tokenHandler.WriteToken(accessToken),
+                RefreshToken = tokenHandler.WriteToken(refreshToken),
+                ExpiredIn = ((DateTimeOffset)accessTokenDescriptor.Expires).ToUnixTimeSeconds()
+            };
         }
         public IDictionary<string, object>? VerifyToken(string token)
         {

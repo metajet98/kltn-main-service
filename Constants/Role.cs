@@ -6,5 +6,7 @@ namespace main_service.Constants
         public const string StaffMaintenance= "StaffMaintenance";
         public const string CenterManager = "CenterManager";
         public const string User = "User";
+
+        public const string SystemUser = "User,StaffDesk,StaffMaintenance";
     }
 }

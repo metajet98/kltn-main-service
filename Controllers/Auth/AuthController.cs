@@ -32,11 +32,7 @@ namespace main_service.Controllers.Auth
             var isPasswordCorrect = _encryptionHelper.ValidatePassword(authRequest.Password, user.UserAuth.Hash, user.UserAuth.Salt);
             if (isPasswordCorrect)
             {
-                return new JsonResult(new AuthResponse
-                {
-                    AccessToken = _encryptionHelper.GenerateAccessToken(user.Id, user.Role),
-                    RefreshToken = _encryptionHelper.GenerateRefreshToken(user.Id)
-                });
+                return new JsonResult(_encryptionHelper.GenerateToken(user.Id, user.Role));
             }
 
             return ResponseHelper<string>.ErrorResponse(null, "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
@@ -64,11 +60,7 @@ namespace main_service.Controllers.Auth
                         "Refresh Token không hợp lệ hoặc đã hết hạn");
                 }
 
-                return new JsonResult(new AuthResponse
-                {
-                    AccessToken = _encryptionHelper.GenerateAccessToken(user.Id, user.Role),
-                    RefreshToken = _encryptionHelper.GenerateRefreshToken(user.Id)
-                });
+                return new JsonResult(_encryptionHelper.GenerateToken(user.Id, user.Role));
             }
             catch (Exception)
             {

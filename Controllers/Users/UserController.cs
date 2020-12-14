@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using main_service.Databases;
+using main_service.Extensions;
 using main_service.Helpers;
 using main_service.Repositories;
 using main_service.RestApi.Requests;
@@ -10,7 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace main_service.Controllers.Users
 {
-    [Route("/user")]
+    [Route("/api/user")]
     public class UserController : ControllerBase
     {
         private readonly UserRepository _userRepository;
@@ -52,6 +53,15 @@ namespace main_service.Controllers.Users
         {
             var users = _userRepository.Get();
             return ResponseHelper<IEnumerable<User>>.OkResponse(users);
+        }
+        
+        [HttpGet]
+        [Route("self")]
+        [Authorize(Roles = Constants.Role.User)]
+        public JsonResult Self()
+        {
+            var userId = User.Identity.GetId();
+            return ResponseHelper<User>.OkResponse(_userRepository.GetById(userId));
         }
         
         [HttpGet]

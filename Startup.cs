@@ -1,6 +1,7 @@
 using System.Text;
 using main_service.Databases;
 using main_service.Repositories;
+using main_service.Services;
 using main_service.Storage;
 using main_service.Utils.EncryptionHelper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -68,6 +69,7 @@ namespace main_service
             services.AddAuthorization();
             services.AddSingleton<IEncryptionHelper, EncryptionHelper>();
             services.AddSingleton<StorageManager>();
+            services.AddSingleton<FcmService>();
             
             services.AddScoped<UserRepository>();
             services.AddScoped<CompanyRepository>();
@@ -80,6 +82,7 @@ namespace main_service
             services.AddScoped<SparePartCheckingStatusRepository>();
             services.AddScoped<MaintenanceServiceRepository>();
             services.AddScoped<BranchServicePriceRepository>();
+            services.AddScoped<FcmTokenRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
