@@ -46,7 +46,8 @@ namespace main_service.Controllers.Vehicles
                 VehicleGroupId = userVehicleRequest.VehicleGroupId,
                 EngineNumber = userVehicleRequest.EngineNumber,
                 PlateNumber = userVehicleRequest.PlateNumber,
-                ChassisNumber = userVehicleRequest.ChassisNumber
+                ChassisNumber = userVehicleRequest.ChassisNumber,
+                Name = userVehicleRequest.Name,
             };
             
             _userVehicleRepository.Insert(newUserVehicle);

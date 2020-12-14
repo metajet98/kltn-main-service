@@ -27,6 +27,7 @@ namespace main_service.Databases
         public string PlateNumber { get; set; }
         [StringLength(20)]
         public string? Color { get; set; }
+        public string? Name { get; set; }
 
         [ForeignKey(nameof(UserId))]
         [InverseProperty("UserVehicle")]
