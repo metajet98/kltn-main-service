@@ -20,8 +20,10 @@ namespace main_service.Repositories
         {
             var query = 
                 from service in _maintenanceServices.Where(x => x.VehicleGroupId.Equals(vehicleGroupId))
-                join branchPrice in DbSet.Where(x => x.BranchId.Equals(branchId)) on service.Id equals branchPrice
-                    .MaintenanceServiceId into result
+                join branchPrice 
+                    in DbSet.Where(x => x.BranchId.Equals(branchId)) 
+                    on service.Id equals branchPrice.MaintenanceServiceId 
+                    into result
                 from x in result.DefaultIfEmpty()
                 select new BranchServicePrice
                 {

@@ -36,16 +36,10 @@ namespace main_service.Repositories
         public bool RemoveToken(string token, int userId)
         {
             var tokenDb = DbSet.FirstOrDefault(x => x.Token.Equals(token) && x.UserId.Equals(userId));
-            if (tokenDb != null)
-            {
-                DbSet.Remove(tokenDb);
-                Context.SaveChanges();
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            if (tokenDb == null) return false;
+            DbSet.Remove(tokenDb);
+            Context.SaveChanges();
+            return true;
         }
 
         public List<string> GetTokens(IEnumerable<int> userIds)

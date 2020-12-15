@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using main_service.Constants;
 using main_service.Databases;
-using main_service.Extensions;
 using main_service.Helpers;
 using main_service.Repositories;
 using main_service.RestApi.Requests;
@@ -10,23 +11,28 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace main_service.Controllers.Staffs
-{
+{ 
+    [ApiController]
     [Route("/api/staff")]
     public class StaffController : ControllerBase
     {
         private readonly UserRepository _userRepository;
         private readonly UserAuthRepository _userAuthRepository;
         private readonly IEncryptionHelper _encryptionHelper;
+        private readonly BranchStaffRepository _branchStaffRepository;
+        private readonly BranchRepository _branchRepository;
 
-        public StaffController(UserRepository userRepository, UserAuthRepository userAuthRepository, IEncryptionHelper encryptionHelper)
+        public StaffController(UserRepository userRepository, UserAuthRepository userAuthRepository, IEncryptionHelper encryptionHelper, BranchStaffRepository branchStaffRepository, BranchRepository branchRepository)
         {
             _userRepository = userRepository;
             _userAuthRepository = userAuthRepository;
             _encryptionHelper = encryptionHelper;
+            _branchStaffRepository = branchStaffRepository;
+            _branchRepository = branchRepository;
         }
         
         [HttpPost]
-        [Route("/maintenance")]
+        [Route("maintenance")]
         [Authorize(Roles = Constants.Role.CenterManager)]
         public JsonResult CreateMaintenanceStaff([FromBody] UserRequest userRequest)
         {
@@ -45,13 +51,13 @@ namespace main_service.Controllers.Staffs
             var newUserAuth = _encryptionHelper.HashPassword(userRequest.Password, newUser.Id);
             _userAuthRepository.Insert(newUserAuth);
             _userAuthRepository.Save();
-            
+
             return ResponseHelper<string>.OkResponse(null, "Tạo tài khoản thành công!");
         }
         
         [HttpPost]
-        [Route("/desk")]
-        [Authorize(Roles = Constants.Role.CenterManager)]
+        [Route("desk")]
+        [Authorize(Roles = Role.CenterManager)]
         public JsonResult CreateDeskStaff([FromBody] UserRequest userRequest)
         {
             var newUser = new User
@@ -74,29 +80,39 @@ namespace main_service.Controllers.Staffs
         }
 
         [HttpGet]
-        [Authorize(Roles = Constants.Role.CenterManager)]
+        [Authorize(Roles = Role.CenterManager)]
         public JsonResult GetAll()
         {
-            var users = _userRepository.Get();
-            return ResponseHelper<IEnumerable<User>>.OkResponse(users);
+            var staff = _branchStaffRepository.Get(includeProperties: "Branch,Staff");
+            return ResponseHelper<IEnumerable<BranchStaff>>.OkResponse(staff);
         }
         
-        [HttpGet]
-        [Route("self")]
-        [Authorize(Roles = Constants.Role.User)]
-        public JsonResult Self()
+        [HttpPost]
+        [Route("{staffId}")]
+        [Authorize(Roles = Role.CenterManager)]
+        public JsonResult ModifyStaff(int staffId, [FromBody] BranchStaffRequest request)
         {
-            var userId = User.Identity.GetId();
-            return ResponseHelper<User>.OkResponse(_userRepository.GetById(userId));
-        }
-        
-        [HttpGet]
-        [Route("{userId}")]
-        [Authorize(Roles = Constants.Role.CenterManager)]
-        public JsonResult Get(int userId)
-        {
-            var user = _userRepository.GetById(userId);
-            return ResponseHelper<User>.OkResponse(user);
+            var branch = _branchRepository.GetById(request.BranchId);
+            if(branch == null) return ResponseHelper<string>.ErrorResponse(null, "Chi nhánh không tồn tại!");
+            var staff = _branchStaffRepository.Get(x => x.StaffId.Equals(staffId)).FirstOrDefault();
+            if (staff != null)
+            {
+                staff.BranchId = request.BranchId;
+                _branchStaffRepository.Update(staff);
+                _branchStaffRepository.Save();
+                return ResponseHelper<string>.OkResponse(null, "Thanh đổi chi nhánh cho nhân viên thành công!");
+            }
+            else
+            {
+                var newBranchStaff = new BranchStaff
+                {
+                    BranchId = request.BranchId,
+                    StaffId = staffId
+                };
+                _branchStaffRepository.Insert(newBranchStaff);
+                _branchStaffRepository.Save();
+                return ResponseHelper<string>.OkResponse(null, "Thêm nhân viên vào chi nhánh thành công!");
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using main_service.Constants;
 using main_service.Databases;
 using main_service.Extensions;
 using main_service.Helpers;
@@ -51,13 +52,13 @@ namespace main_service.Controllers.Users
         [Authorize(Roles = Constants.Role.CenterManager)]
         public JsonResult GetAll()
         {
-            var users = _userRepository.Get();
+            var users = _userRepository.Get(x => x.Role.Equals(Role.User));
             return ResponseHelper<IEnumerable<User>>.OkResponse(users);
         }
         
         [HttpGet]
         [Route("self")]
-        [Authorize(Roles = Constants.Role.User)]
+        [Authorize(Roles = Role.SystemUser)]
         public JsonResult Self()
         {
             var userId = User.Identity.GetId();
