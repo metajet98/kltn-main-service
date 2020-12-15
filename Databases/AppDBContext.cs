@@ -21,6 +21,7 @@ namespace main_service.Databases
         public virtual DbSet<FcmToken> FcmToken { get; set; }
         public virtual DbSet<Maintenance> Maintenance { get; set; }
         public virtual DbSet<MaintenanceBillDetail> MaintenanceBillDetail { get; set; }
+        public virtual DbSet<MaintenanceImage> MaintenanceImage { get; set; }
         public virtual DbSet<MaintenanceSchedule> MaintenanceSchedule { get; set; }
         public virtual DbSet<MaintenanceService> MaintenanceService { get; set; }
         public virtual DbSet<Notification> Notification { get; set; }
@@ -134,7 +135,6 @@ namespace main_service.Databases
                 entity.HasOne(d => d.MaintenanceStaff)
                     .WithMany(p => p.MaintenanceMaintenanceStaff)
                     .HasForeignKey(d => d.MaintenanceStaffId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("MAINTENANCE_USER_Id_fk");
 
                 entity.HasOne(d => d.ReceptionStaff)
@@ -171,6 +171,23 @@ namespace main_service.Databases
                     .HasForeignKey(d => d.MaintenanceId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("MAINTENANCE_BILL_MAINTENANCE_Id_fk");
+            });
+
+            modelBuilder.Entity<MaintenanceImage>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("MAINTENANCE_IMAGE_pk")
+                    .IsClustered(false);
+
+                entity.HasIndex(e => e.Id)
+                    .HasName("MAINTENANCE_IMAGE_Id_uindex")
+                    .IsUnique();
+
+                entity.HasOne(d => d.Maintenance)
+                    .WithMany(p => p.MaintenanceImage)
+                    .HasForeignKey(d => d.MaintenanceId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("MAINTENANCE_IMAGE_MAINTENANCE_Id_fk");
             });
 
             modelBuilder.Entity<MaintenanceSchedule>(entity =>

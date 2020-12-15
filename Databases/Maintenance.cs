@@ -11,6 +11,7 @@ namespace main_service.Databases
         public Maintenance()
         {
             MaintenanceBillDetail = new HashSet<MaintenanceBillDetail>();
+            MaintenanceImage = new HashSet<MaintenanceImage>();
             SparepartCheckDetail = new HashSet<SparepartCheckDetail>();
         }
 
@@ -26,6 +27,7 @@ namespace main_service.Databases
         [Column(TypeName = "datetime")]
         public DateTime? ModifyDate { get; set; }
         public int? BranchId { get; set; }
+        public string Title { get; set; }
 
         [ForeignKey(nameof(BranchId))]
         [InverseProperty("Maintenance")]
@@ -41,6 +43,8 @@ namespace main_service.Databases
         public virtual UserVehicle UserVehicle { get; set; }
         [InverseProperty("Maintenance")]
         public virtual ICollection<MaintenanceBillDetail> MaintenanceBillDetail { get; set; }
+        [InverseProperty("Maintenance")]
+        public virtual ICollection<MaintenanceImage> MaintenanceImage { get; set; }
         [InverseProperty("Maintenance")]
         public virtual ICollection<SparepartCheckDetail> SparepartCheckDetail { get; set; }
     }
