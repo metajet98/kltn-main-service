@@ -69,7 +69,6 @@ namespace main_service
             services.AddAuthorization();
             services.AddSingleton<IEncryptionHelper, EncryptionHelper>();
             services.AddSingleton<StorageManager>();
-            services.AddSingleton<FcmService>();
             
             services.AddScoped<UserRepository>();
             services.AddScoped<CompanyRepository>();
@@ -83,6 +82,8 @@ namespace main_service
             services.AddScoped<MaintenanceServiceRepository>();
             services.AddScoped<BranchServicePriceRepository>();
             services.AddScoped<FcmTokenRepository>();
+            services.AddScoped<FcmService>();
+
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

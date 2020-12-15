@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using main_service.Databases;
 using main_service.Repositories.Base;
@@ -45,6 +46,15 @@ namespace main_service.Repositories
             {
                 return false;
             }
+        }
+
+        public List<string> GetTokens(IEnumerable<int> userIds)
+        {
+            var query = from userId in userIds
+                join tokens in DbSet on userId equals tokens.UserId into result
+                from token in result
+                select token.Token;
+            return query.ToList();
         }
     }
 }

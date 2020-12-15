@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using main_service.Constants;
 using main_service.Databases;
 using main_service.Extensions;
 using main_service.Helpers;
 using main_service.Repositories;
 using main_service.RestApi.Requests;
+using main_service.RestApi.Response;
+using main_service.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,12 +21,15 @@ namespace main_service.Controllers.Vehicles
         private readonly UserVehicleRepository _userVehicleRepository;
         private readonly UserRepository _userRepository;
         private readonly VehicleGroupRepository _vehicleGroupRepository;
+        private readonly FcmService _fcmService;
 
-        public UserVehicleController(UserVehicleRepository userVehicleRepository, UserRepository userRepository, VehicleGroupRepository vehicleGroupRepository)
+        public UserVehicleController(UserVehicleRepository userVehicleRepository, UserRepository userRepository,
+            VehicleGroupRepository vehicleGroupRepository, FcmService fcmService)
         {
             _userVehicleRepository = userVehicleRepository;
             _userRepository = userRepository;
             _vehicleGroupRepository = vehicleGroupRepository;
+            _fcmService = fcmService;
         }
 
         [HttpPost]
@@ -39,6 +45,7 @@ namespace main_service.Controllers.Vehicles
             {
                 return ResponseHelper<string>.ErrorResponse("vehicleGroupId", "Không tìm thấy loại xe");
             }
+
             var newUserVehicle = new UserVehicle
             {
                 Color = userVehicleRequest.Color,
@@ -49,9 +56,12 @@ namespace main_service.Controllers.Vehicles
                 ChassisNumber = userVehicleRequest.ChassisNumber,
                 Name = userVehicleRequest.Name,
             };
-            
+
             _userVehicleRepository.Insert(newUserVehicle);
             _userVehicleRepository.Save();
+            _fcmService.SendMessage(
+                new List<int> {userId},
+                FcmData.CreateFcmData("create_bike_success", new Dictionary<string, string> {{"status", "done"}}));
             return ResponseHelper<string>.OkResponse(null, "Thêm xe thành công");
         }
 
@@ -62,12 +72,13 @@ namespace main_service.Controllers.Vehicles
             var userVehicles = _userVehicleRepository.FindByUserId(userId);
             return ResponseHelper<IEnumerable<UserVehicle>>.OkResponse(userVehicles);
         }
-        
+
         [HttpGet]
         [Route("{userVehicleId}")]
         public JsonResult Get(int userVehicleId)
         {
-            var userVehicle = _userVehicleRepository.GetById(userVehicleId);
+            var userVehicle = _userVehicleRepository
+                .Get(x => x.Id.Equals(userVehicleId), includeProperties: "Maintenance,VehicleGroup").FirstOrDefault();
             return ResponseHelper<UserVehicle>.OkResponse(userVehicle);
         }
 
@@ -83,6 +94,7 @@ namespace main_service.Controllers.Vehicles
                 {
                     return ResponseHelper<string>.ErrorResponse(null, "Không tìm thấy xe cần xóa");
                 }
+
                 _userVehicleRepository.Delete(targetUserVehicle);
                 _userVehicleRepository.Save();
                 return ResponseHelper<string>.OkResponse(null, "Xóa thành công");

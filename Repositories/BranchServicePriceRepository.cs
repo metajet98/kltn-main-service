@@ -9,7 +9,7 @@ namespace main_service.Repositories
 {
     public class BranchServicePriceRepository : BaseRepository<BranchServicePrice>
     {
-        private DbSet<MaintenanceService> _maintenanceServices;
+        private readonly DbSet<MaintenanceService> _maintenanceServices;
 
         public BranchServicePriceRepository(AppDBContext context) : base(context)
         {

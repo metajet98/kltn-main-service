@@ -27,5 +27,10 @@
       <Folder Include="Databases" />
       <Folder Include="Domains" />
     </ItemGroup>
+    <ItemGroup>
+        <None Update="flutterfcm-78458-firebase-adminsdk-qpifp-9c3aa79fb7.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
 </Project>

@@ -37,10 +37,8 @@ namespace main_service.Controllers.Fcm
         public JsonResult Unregister([FromBody] FcmTokenRequest data)
         {
             var userId = User.Identity.GetId();
-            var resultDelete = _fcmTokenRepository.RemoveToken(data.Token, userId);
-            return resultDelete
-                ? ResponseHelper<dynamic>.OkResponse(null)
-                : ResponseHelper<dynamic>.ErrorResponse(null);
+            _fcmTokenRepository.RemoveToken(data.Token, userId);
+            return ResponseHelper<dynamic>.OkResponse(null);
         }
     }
 }
