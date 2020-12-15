@@ -2,6 +2,7 @@ using System.Linq;
 using main_service.Databases;
 using main_service.Repositories.Base;
 using main_service.RestApi.Requests;
+using Microsoft.EntityFrameworkCore;
 
 namespace main_service.Repositories
 {
@@ -72,7 +73,7 @@ namespace main_service.Repositories
             var maintenance = Get(x => x.Id.Equals(maintenanceId), includeProperties: "MaintenanceBillDetail").FirstOrDefault();
             if (maintenance == null) return false;
             var servicePrice =
-                Context.BranchServicePrice.FirstOrDefault(x => x.Id.Equals(request.BranchServicePriceId));
+                Context.BranchServicePrice.Include(x => x.MaintenanceService).FirstOrDefault(x => x.Id.Equals(request.BranchServicePriceId));
             if (servicePrice == null) return false;
             var item = maintenance.MaintenanceBillDetail.FirstOrDefault(x =>
                 x.BranchServicePriceId.Equals(request.BranchServicePriceId));
@@ -84,6 +85,9 @@ namespace main_service.Repositories
                     MaintenanceId = maintenanceId,
                     TotalPrice = request.Quantity * (servicePrice.LaborCost + servicePrice.SparePartPrice),
                     BranchServicePriceId = request.BranchServicePriceId,
+                    Title = servicePrice.MaintenanceService.Name,
+                    LaborCost = servicePrice.LaborCost ?? 0,
+                    SparePartPrice = servicePrice.SparePartPrice ?? 0
                 });
             }
             else

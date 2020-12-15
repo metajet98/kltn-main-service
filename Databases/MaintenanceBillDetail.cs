@@ -14,9 +14,9 @@ namespace main_service.Databases
         public int? Quantity { get; set; }
         public int? TotalPrice { get; set; }
         public int MaintenanceId { get; set; }
-        public int SparePartPrice { get; set; }
-        public int LaborCost { get; set; }
-        public string Title { get; set; }
+        public int? SparePartPrice { get; set; }
+        public int? LaborCost { get; set; }
+        public string? Title { get; set; }
 
         [ForeignKey(nameof(BranchServicePriceId))]
         [InverseProperty("MaintenanceBillDetail")]
