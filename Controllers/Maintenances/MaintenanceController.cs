@@ -56,6 +56,11 @@ namespace main_service.Controllers.Maintenances
                 };
                 _maintenanceRepository.Insert(newMaintenance);
                 _maintenanceRepository.Save();
+
+                if (request.Images != null)
+                {
+                    _maintenanceRepository.InsertMaintenanceImages(newMaintenance.Id, request.Images);
+                }
                 return ResponseHelper<Maintenance>.OkResponse(newMaintenance, "Tạo lượt bảo dưỡng thành công");
             }
             else
@@ -65,8 +70,17 @@ namespace main_service.Controllers.Maintenances
         }
         
         [HttpGet]
-        [Route("{maintenanceId}")]
+        [Route("{maintenanceId}/all")]
         [Authorize(Roles = Role.All)]
+        public JsonResult GetMaintenanceAllDetail(int maintenanceId)
+        {
+            var maintenance = _maintenanceRepository.GetMaintenanceAllDetail(maintenanceId);
+            return ResponseHelper<Maintenance>.OkResponse(maintenance);
+        }
+        
+        [HttpGet]
+        [Route("{maintenanceId}")]
+        [Authorize(Roles = Role.User)]
         public JsonResult GetMaintenance(int maintenanceId)
         {
             var maintenance = _maintenanceRepository.GetMaintenance(maintenanceId);
@@ -94,6 +108,28 @@ namespace main_service.Controllers.Maintenances
                 _maintenanceRepository.InsertMaintenanceBill(request, maintenanceId);
             return result
                 ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
+                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+        }
+        
+        [HttpPost]
+        [Route("{maintenanceId}/images")]
+        public JsonResult AddMaintenanceImage(int maintenanceId, [FromBody] ImageRequest image)
+        {
+            var result =
+                _maintenanceRepository.AddMaintenanceImage(maintenanceId, image.ImageUrl);
+            return result
+                ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
+                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+        }
+        
+        [HttpDelete]
+        [Route("{maintenanceId}/images/{imageId}")]
+        public JsonResult RemoveMaintenanceImage(int maintenanceId, int imageId)
+        {
+            var result =
+                _maintenanceRepository.DeleteMaintenanceImage(imageId);
+            return result
+                ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
                 : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
         }
     }

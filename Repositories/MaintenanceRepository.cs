@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using main_service.Databases;
 using main_service.Repositories.Base;
@@ -12,9 +14,9 @@ namespace main_service.Repositories
         {
         }
 
-        public Maintenance GetMaintenance(int maintenanceId)
+        public Maintenance GetMaintenanceAllDetail(int maintenanceId)
         {
-            var maintenance = Get(x => x.Id.Equals(maintenanceId), includeProperties: "UserVehicle").FirstOrDefault();
+            var maintenance = Get(x => x.Id.Equals(maintenanceId), includeProperties: "UserVehicle,MaintenanceBillDetail,Branch,ReceptionStaff,MaintenanceStaff").FirstOrDefault();
             if (maintenance == null) return null;
             var query =
                 from checkList
@@ -40,6 +42,20 @@ namespace main_service.Repositories
             return maintenance;
         }
 
+        public Maintenance GetMaintenance(int maintenanceId)
+        {
+            var result = DbSet
+                .Include(x => x.UserVehicle)
+                .Include(x => x.MaintenanceBillDetail)
+                .Include(x => x.Branch)
+                .Include(x => x.ReceptionStaff)
+                .Include(x => x.MaintenanceStaff)
+                .Include(x => x.SparepartCheckDetail).ThenInclude(y => y.Status)
+                .Include(x => x.SparepartCheckDetail).ThenInclude(y => y.SparePartItem)
+                .FirstOrDefault(x => x.Id.Equals(maintenanceId));
+            return result;
+        }
+        
         public bool InsertMaintenanceCheck(int statusId, int vehicleSparePartId, int maintenanceId)
         {
             var maintenance = Get(x => x.Id.Equals(maintenanceId), includeProperties: "SparepartCheckDetail")
@@ -96,6 +112,39 @@ namespace main_service.Repositories
                 item.TotalPrice = request.Quantity * (servicePrice.LaborCost + servicePrice.SparePartPrice);
                 Context.MaintenanceBillDetail.Update(item);
             }
+            Context.SaveChanges();
+            return true;
+        }
+
+        public bool InsertMaintenanceImages(int maintenanceId, List<string> images)
+        {
+            Context.MaintenanceImage.AddRange(images.Select(image => new MaintenanceImage
+            {
+                MaintenanceId = maintenanceId,
+                ImageUrl = image,
+                CreatedDate = DateTime.Now
+            } ));
+            Context.SaveChanges();
+            return true;
+        }
+        
+        public bool DeleteMaintenanceImage(int imageId)
+        {
+            var image = Context.MaintenanceImage.FirstOrDefault(x => x.Id.Equals(imageId));
+            if (image == null) return false;
+            Context.MaintenanceImage.Remove(image);
+            Context.SaveChanges();
+            return true;
+        }
+        
+        public bool AddMaintenanceImage(int maintenanceId, string imageUrl)
+        {
+            Context.MaintenanceImage.Add(new MaintenanceImage
+            {
+                MaintenanceId = maintenanceId,
+                ImageUrl = imageUrl,
+                CreatedDate = DateTime.Now
+            });
             Context.SaveChanges();
             return true;
         }

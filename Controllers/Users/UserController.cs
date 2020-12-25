@@ -36,7 +36,7 @@ namespace main_service.Controllers.Users
                 Email = userRequest.Email,
                 FullName = userRequest.FullName,
                 PhoneNumber = userRequest.PhoneNumber,
-                Role = Constants.Role.User,
+                Role = Role.User,
                 CreatedDate = DateTime.Now
             };
             _userRepository.Insert(newUser);

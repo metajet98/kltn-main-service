@@ -26,7 +26,31 @@ namespace main_service.Controllers.Auth
             var user = _userRepository.FindByPhoneNumber(authRequest.PhoneNumber);
             if (user == null)
             {
-                return ResponseHelper<string>.ErrorResponse(null, null, "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
+                return ResponseHelper<string>.ErrorResponse(null,  "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
+            }
+
+            var isPasswordCorrect = _encryptionHelper.ValidatePassword(authRequest.Password, user.UserAuth.Hash, user.UserAuth.Salt);
+            if (isPasswordCorrect)
+            {
+                return new JsonResult(_encryptionHelper.GenerateToken(user.Id, user.Role));
+            }
+
+            return ResponseHelper<string>.ErrorResponse(null, "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
+        }
+        
+        [HttpPost]
+        [Route("/api/login/staff_maintenance")]
+        public JsonResult StaffLogin([FromBody] UserRequest authRequest)
+        {
+            var user = _userRepository.FindByPhoneNumber(authRequest.PhoneNumber);
+            if (user == null)
+            {
+                return ResponseHelper<string>.ErrorResponse(null,  "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
+            }
+            
+            if (user.Role != Constants.Role.StaffMaintenance)
+            {
+                return ResponseHelper<string>.ErrorResponse(null,  "Tài khoản không phải là nhân viên bảo dưỡng");
             }
 
             var isPasswordCorrect = _encryptionHelper.ValidatePassword(authRequest.Password, user.UserAuth.Hash, user.UserAuth.Salt);

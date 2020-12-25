@@ -66,10 +66,20 @@ namespace main_service.Controllers.Vehicles
         }
 
         [HttpGet]
-        public JsonResult GetAll()
+        [Route("self")]
+        [Authorize(Roles = Role.User)]
+        public JsonResult GetAllSelf()
         {
             var userId = User.Identity.GetId();
             var userVehicles = _userVehicleRepository.FindByUserId(userId);
+            return ResponseHelper<IEnumerable<UserVehicle>>.OkResponse(userVehicles);
+        }
+        
+        [HttpGet]
+        [Authorize(Roles = Role.Staff)]
+        public JsonResult QueryAll([FromQuery] UserVehicleQuery query)
+        {
+            var userVehicles = _userVehicleRepository.Get(x => x.PlateNumber.Equals(query.PlateNumber));
             return ResponseHelper<IEnumerable<UserVehicle>>.OkResponse(userVehicles);
         }
 
