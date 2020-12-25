@@ -28,6 +28,9 @@ namespace main_service.Databases
         public DateTime? ModifyDate { get; set; }
         public int? BranchId { get; set; }
         public string? Title { get; set; }
+        public int Status { get; set; }
+        public int MotorWash { get; set; }
+        public bool? SparepartBack { get; set; }
 
         [ForeignKey(nameof(BranchId))]
         [InverseProperty("Maintenance")]

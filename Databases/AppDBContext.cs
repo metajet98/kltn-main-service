@@ -126,6 +126,8 @@ namespace main_service.Databases
                     .HasName("MAINTENANCE_Id_uindex")
                     .IsUnique();
 
+                entity.Property(e => e.SparepartBack).HasDefaultValueSql("((0))");
+
                 entity.HasOne(d => d.Branch)
                     .WithMany(p => p.Maintenance)
                     .HasForeignKey(d => d.BranchId)
@@ -286,10 +288,6 @@ namespace main_service.Databases
                 entity.HasKey(e => e.Id)
                     .HasName("USER_pk")
                     .IsClustered(false);
-
-                entity.HasIndex(e => e.Email)
-                    .HasName("USER_Email_uindex")
-                    .IsUnique();
 
                 entity.HasIndex(e => e.PhoneNumber)
                     .HasName("USER_PhoneNumber_uindex")
