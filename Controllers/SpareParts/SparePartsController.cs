@@ -25,7 +25,7 @@ namespace main_service.Controllers.SpareParts
 
         [HttpGet]
         [Route("spare-part/status")]
-        [Authorize(Roles = Role.CenterManager)]
+        [Authorize(Roles = Role.All)]
         public JsonResult GetAllStatus()
         {
             var status = _sparePartCheckingStatusRepository.Get();
@@ -49,7 +49,7 @@ namespace main_service.Controllers.SpareParts
         
         [HttpGet]
         [Route("vehicle-group/{vehicleGroupId}/spare-part")]
-        [Authorize(Roles = Role.CenterManager)]
+        [Authorize(Roles = Role.Staff)]
         public JsonResult GetVehicleSparePart(int vehicleGroupId)
         {
             var vehicleSparePart = _sparePartRepository.GetByVehicleGroupId(vehicleGroupId);

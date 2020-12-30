@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using main_service.Constants;
 using main_service.Databases;
 using main_service.Repositories.Base;
 using main_service.RestApi.Requests;
@@ -16,7 +17,9 @@ namespace main_service.Repositories
 
         public Maintenance GetMaintenanceAllDetail(int maintenanceId)
         {
-            var maintenance = Get(x => x.Id.Equals(maintenanceId), includeProperties: "UserVehicle,MaintenanceBillDetail,Branch,ReceptionStaff,MaintenanceStaff").FirstOrDefault();
+            var maintenance = Get(x => x.Id.Equals(maintenanceId),
+                    includeProperties: "UserVehicle,MaintenanceBillDetail,Branch,ReceptionStaff,MaintenanceStaff")
+                .FirstOrDefault();
             if (maintenance == null) return null;
             var query =
                 from checkList
@@ -55,41 +58,57 @@ namespace main_service.Repositories
                 .FirstOrDefault(x => x.Id.Equals(maintenanceId));
             return result;
         }
-        
-        public bool InsertMaintenanceCheck(int statusId, int vehicleSparePartId, int maintenanceId)
-        {
-            var maintenance = Get(x => x.Id.Equals(maintenanceId), includeProperties: "SparepartCheckDetail")
-                .FirstOrDefault();
-            if (maintenance == null) return false;
 
-            var sparePartCheckDetail =
-                maintenance.SparepartCheckDetail.FirstOrDefault(x => x.SparePartItemId.Equals(vehicleSparePartId));
-            if (sparePartCheckDetail != null)
+        public bool InsertMaintenanceChecks(int maintenanceId, List<SparePartMaintenanceCheck> listCheck)
+        {
+            try
             {
-                sparePartCheckDetail.StatusId = statusId;
-                Context.SparepartCheckDetail.Update(sparePartCheckDetail);
-                Context.SaveChanges();
-                return true;
-            }
-            else
-            {
-                Context.SparepartCheckDetail.Add(new SparepartCheckDetail
+                var maintenance = Get(x => x.Id.Equals(maintenanceId), includeProperties: "SparepartCheckDetail")
+                    .FirstOrDefault();
+                if (maintenance == null) return false;
+
+                var sparePartDetails = maintenance.SparepartCheckDetail;
+
+                foreach (var sparePartMaintenanceCheck in listCheck)
                 {
-                    MaintenanceId = maintenanceId,
-                    StatusId = statusId,
-                    SparePartItemId = vehicleSparePartId
-                });
+                    if (sparePartDetails.Any(
+                        x => x.SparePartItemId.Equals(sparePartMaintenanceCheck.VehicleSparePartId)))
+                    {
+                        var old = Context.SparepartCheckDetail.FirstOrDefault(x =>
+                            x.MaintenanceId.Equals(maintenanceId) &&
+                            x.SparePartItemId.Equals(sparePartMaintenanceCheck.VehicleSparePartId));
+                        old.StatusId = sparePartMaintenanceCheck.StatusId;
+                        Context.SparepartCheckDetail.Update(old);
+                    }
+                    else
+                    {
+                        Context.SparepartCheckDetail.Add(new SparepartCheckDetail
+                        {
+                            StatusId = sparePartMaintenanceCheck.StatusId,
+                            SparePartItemId = sparePartMaintenanceCheck.VehicleSparePartId,
+                            MaintenanceId = maintenanceId,
+                        });
+                    }
+                }
+
                 Context.SaveChanges();
                 return true;
             }
+            catch (Exception e)
+            {
+                return false;
+            }
+            
         }
-        
+
         public bool InsertMaintenanceBill(MaintenanceBillRequest request, int maintenanceId)
         {
-            var maintenance = Get(x => x.Id.Equals(maintenanceId), includeProperties: "MaintenanceBillDetail").FirstOrDefault();
+            var maintenance = Get(x => x.Id.Equals(maintenanceId), includeProperties: "MaintenanceBillDetail")
+                .FirstOrDefault();
             if (maintenance == null) return false;
             var servicePrice =
-                Context.BranchServicePrice.Include(x => x.MaintenanceService).FirstOrDefault(x => x.Id.Equals(request.BranchServicePriceId));
+                Context.BranchServicePrice.Include(x => x.MaintenanceService)
+                    .FirstOrDefault(x => x.Id.Equals(request.BranchServicePriceId));
             if (servicePrice == null) return false;
             var item = maintenance.MaintenanceBillDetail.FirstOrDefault(x =>
                 x.BranchServicePriceId.Equals(request.BranchServicePriceId));
@@ -112,6 +131,7 @@ namespace main_service.Repositories
                 item.TotalPrice = request.Quantity * (servicePrice.LaborCost + servicePrice.SparePartPrice);
                 Context.MaintenanceBillDetail.Update(item);
             }
+
             Context.SaveChanges();
             return true;
         }
@@ -123,11 +143,11 @@ namespace main_service.Repositories
                 MaintenanceId = maintenanceId,
                 ImageUrl = image,
                 CreatedDate = DateTime.Now
-            } ));
+            }));
             Context.SaveChanges();
             return true;
         }
-        
+
         public bool DeleteMaintenanceImage(int imageId)
         {
             var image = Context.MaintenanceImage.FirstOrDefault(x => x.Id.Equals(imageId));
@@ -136,7 +156,7 @@ namespace main_service.Repositories
             Context.SaveChanges();
             return true;
         }
-        
+
         public bool AddMaintenanceImage(int maintenanceId, string imageUrl)
         {
             Context.MaintenanceImage.Add(new MaintenanceImage
@@ -145,6 +165,16 @@ namespace main_service.Repositories
                 ImageUrl = imageUrl,
                 CreatedDate = DateTime.Now
             });
+            Context.SaveChanges();
+            return true;
+        }
+
+        public bool UpdateMaintainer(int maintenanceId, int maintainerId)
+        {
+            var maintenance = DbSet.FirstOrDefault(x => x.Id.Equals(maintenanceId));
+            if (maintenance == null || maintenance.Status != MaintenanceStatus.Created) return false;
+            maintenance.MaintenanceStaffId = maintainerId;
+            maintenance.Status = MaintenanceStatus.UnderMaintenance;
             Context.SaveChanges();
             return true;
         }

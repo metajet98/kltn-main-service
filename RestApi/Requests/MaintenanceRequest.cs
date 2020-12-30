@@ -8,5 +8,7 @@ namespace main_service.RestApi.Requests
         public string? Notes { get; set; }
         public int Odometer { get; set; }
         public List<string>? Images { get; set; }
+        public int MotorWash { get; set; }
+        public bool SparepartBack { get; set; }
     }
 }

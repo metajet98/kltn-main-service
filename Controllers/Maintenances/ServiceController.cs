@@ -68,7 +68,7 @@ namespace main_service.Controllers.Maintenances
         
         [HttpGet]
         [Route("branch/{branchId}/price")]
-        [Authorize(Roles = Role.CenterManager)]
+        [Authorize(Roles = Role.Staff)]
         public JsonResult GetBranchServices(int branchId, [FromQuery] int vehicleGroupId)
         {
             var branchServices = _branchServicePriceRepository.GetAllPriceByVehicleGroupId(vehicleGroupId, branchId);

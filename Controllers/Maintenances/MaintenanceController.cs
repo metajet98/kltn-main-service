@@ -53,6 +53,9 @@ namespace main_service.Controllers.Maintenances
                     CreatedDate = DateTime.Now,
                     ReceptionStaffId = staff.StaffId,
                     UserVehicleId = request.UserVehicleId,
+                    Status = 0,
+                    MotorWash = request.MotorWash,
+                    SparepartBack = request.SparepartBack,
                 };
                 _maintenanceRepository.Insert(newMaintenance);
                 _maintenanceRepository.Save();
@@ -80,7 +83,7 @@ namespace main_service.Controllers.Maintenances
         
         [HttpGet]
         [Route("{maintenanceId}")]
-        [Authorize(Roles = Role.User)]
+        [Authorize(Roles = Role.All)]
         public JsonResult GetMaintenance(int maintenanceId)
         {
             var maintenance = _maintenanceRepository.GetMaintenance(maintenanceId);
@@ -93,8 +96,7 @@ namespace main_service.Controllers.Maintenances
         public JsonResult UpdateMaintenanceCheck(int maintenanceId, [FromBody] SparePartMaintenanceCheckRequest request)
         {
             var result =
-                _maintenanceRepository.InsertMaintenanceCheck(request.StatusId, request.VehicleSparePartId,
-                    maintenanceId);
+                _maintenanceRepository.InsertMaintenanceChecks(maintenanceId, request.SparePartMaintenanceChecks);
             return result
                 ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
                 : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
@@ -120,6 +122,29 @@ namespace main_service.Controllers.Maintenances
             return result
                 ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
                 : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+        }
+        
+        [HttpPost]
+        [Route("{maintenanceId}/start")]
+        public JsonResult StartMaintenance(int maintenanceId)
+        {
+            var maintainerId = User.Identity.GetId();
+            var maintainer = _userRepository.GetById(maintainerId);
+            if (maintainer == null || maintainer.Role != Role.StaffMaintenance)
+            {
+                return ResponseHelper<dynamic>.ErrorResponse(null, "Chỉ có nhân viên bảo dưỡng mới tiến hành được!");
+            }
+
+            var result = _maintenanceRepository.UpdateMaintainer(maintenanceId, maintainerId);
+            if (result)
+            {
+                var maintenance = _maintenanceRepository.GetById(maintenanceId);
+                return ResponseHelper<dynamic>.OkResponse(maintenance);
+            }
+            else
+            {
+                return ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
         
         [HttpDelete]
