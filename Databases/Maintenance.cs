@@ -12,6 +12,7 @@ namespace main_service.Databases
         {
             MaintenanceBillDetail = new HashSet<MaintenanceBillDetail>();
             MaintenanceImage = new HashSet<MaintenanceImage>();
+            MaintenanceSchedule = new HashSet<MaintenanceSchedule>();
             SparepartCheckDetail = new HashSet<SparepartCheckDetail>();
         }
 
@@ -48,6 +49,8 @@ namespace main_service.Databases
         public virtual ICollection<MaintenanceBillDetail> MaintenanceBillDetail { get; set; }
         [InverseProperty("Maintenance")]
         public virtual ICollection<MaintenanceImage> MaintenanceImage { get; set; }
+        [InverseProperty("Maintenance")]
+        public virtual ICollection<MaintenanceSchedule> MaintenanceSchedule { get; set; }
         [InverseProperty("Maintenance")]
         public virtual ICollection<SparepartCheckDetail> SparepartCheckDetail { get; set; }
     }

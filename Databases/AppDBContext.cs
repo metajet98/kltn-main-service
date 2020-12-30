@@ -202,6 +202,11 @@ namespace main_service.Databases
                     .HasName("MAINTENANCE_SCHEDULE_Id_uindex")
                     .IsUnique();
 
+                entity.HasOne(d => d.Maintenance)
+                    .WithMany(p => p.MaintenanceSchedule)
+                    .HasForeignKey(d => d.MaintenanceId)
+                    .HasConstraintName("MAINTENANCE_SCHEDULE_MAINTENANCE_Id_fk");
+
                 entity.HasOne(d => d.UserVehicle)
                     .WithMany(p => p.MaintenanceSchedule)
                     .HasForeignKey(d => d.UserVehicleId)

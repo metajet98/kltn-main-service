@@ -18,7 +18,11 @@ namespace main_service.Databases
         [StringLength(50)]
         public string Title { get; set; }
         public string? Content { get; set; }
+        public int? MaintenanceId { get; set; }
 
+        [ForeignKey(nameof(MaintenanceId))]
+        [InverseProperty("MaintenanceSchedule")]
+        public virtual Maintenance Maintenance { get; set; }
         [ForeignKey(nameof(UserVehicleId))]
         [InverseProperty("MaintenanceSchedule")]
         public virtual UserVehicle UserVehicle { get; set; }
