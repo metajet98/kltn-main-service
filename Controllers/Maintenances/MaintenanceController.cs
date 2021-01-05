@@ -104,6 +104,7 @@ namespace main_service.Controllers.Maintenances
         
         [HttpPost]
         [Route("{maintenanceId}/bill")]
+        [Authorize(Roles = Role.Staff)]
         public JsonResult UpdateMaintenanceBill(int maintenanceId, [FromBody] MaintenanceBillRequest request)
         {
             var result =
@@ -126,6 +127,7 @@ namespace main_service.Controllers.Maintenances
         
         [HttpPost]
         [Route("{maintenanceId}/start")]
+        [Authorize(Roles = Role.StaffMaintenance)]
         public JsonResult StartMaintenance(int maintenanceId)
         {
             var maintainerId = User.Identity.GetId();
@@ -147,14 +149,45 @@ namespace main_service.Controllers.Maintenances
             }
         }
         
+        [HttpPost]
+        [Route("{maintenanceId}/finish")]
+        [Authorize(Roles = Role.StaffMaintenance)]
+        public JsonResult FinishMaintenance(int maintenanceId)
+        {
+            var maintainerId = User.Identity.GetId();
+            var maintainer = _userRepository.GetById(maintainerId);
+            if (maintainer == null || maintainer.Role != Role.StaffMaintenance)
+            {
+                return ResponseHelper<dynamic>.ErrorResponse(null, "Chỉ có nhân viên bảo dưỡng mới tiến hành được!");
+            }
+
+            var result = _maintenanceRepository.FinishMaintenance(maintenanceId);
+            return result
+                ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
+                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+        }
+        
         [HttpDelete]
         [Route("{maintenanceId}/images/{imageId}")]
+        [Authorize(Roles = Role.Staff)]
         public JsonResult RemoveMaintenanceImage(int maintenanceId, int imageId)
         {
             var result =
                 _maintenanceRepository.DeleteMaintenanceImage(imageId);
             return result
                 ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
+                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+        }
+        
+        [HttpPost]
+        [Route("{maintenanceId}/schedule")]
+        [Authorize(Roles = Role.Staff)]
+        public JsonResult AddMaintenanceSchedule(int maintenanceId, [FromBody] MaintenanceScheduleRequest request)
+        {
+            var result =
+                _maintenanceRepository.InsertSchedule(maintenanceId, request);
+            return result
+                ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
                 : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
         }
     }

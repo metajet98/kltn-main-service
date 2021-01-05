@@ -53,6 +53,7 @@ namespace main_service.Repositories
                 .Include(x => x.Branch)
                 .Include(x => x.ReceptionStaff)
                 .Include(x => x.MaintenanceStaff)
+                .Include(x => x.MaintenanceSchedule)
                 .Include(x => x.SparepartCheckDetail).ThenInclude(y => y.Status)
                 .Include(x => x.SparepartCheckDetail).ThenInclude(y => y.SparePartItem)
                 .FirstOrDefault(x => x.Id.Equals(maintenanceId));
@@ -177,6 +178,48 @@ namespace main_service.Repositories
             maintenance.Status = MaintenanceStatus.UnderMaintenance;
             Context.SaveChanges();
             return true;
+        }
+        
+        public bool FinishMaintenance(int maintenanceId)
+        {
+            try
+            {
+                var maintenance = DbSet.FirstOrDefault(x => x.Id.Equals(maintenanceId));
+                if (maintenance == null) return false;
+                maintenance.Status = MaintenanceStatus.Finish;
+                Context.SaveChanges();
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+        public bool InsertSchedule(int maintenanceId, MaintenanceScheduleRequest request)
+        {
+            try
+            {
+                var maintenance = DbSet.FirstOrDefault(x => x.Id.Equals(maintenanceId));
+                if (maintenance == null) return false;
+
+                Context.MaintenanceSchedule.Add(new MaintenanceSchedule
+                {
+                    Content = request.Content,
+                    Date = request.Date,
+                    MaintenanceId = maintenanceId,
+                    Odometer = request.Odometer,
+                    Title = request.Title,
+                    UserVehicleId = maintenance.UserVehicleId
+                });
+                Context.SaveChanges();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
         }
     }
 }

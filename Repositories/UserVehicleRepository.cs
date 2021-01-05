@@ -16,5 +16,10 @@ namespace main_service.Repositories
         {
             return DbSet.Where(x => x.UserId == userId).Include(x => x.VehicleGroup).ToList();
         }
+        
+        public IEnumerable<MaintenanceSchedule> GetSchedule(int userVehicleId)
+        {
+            return Context.MaintenanceSchedule.Where(x => x.UserVehicleId.Equals(userVehicleId)).Include(x => x.Maintenance).ToList();
+        }
     }
 }

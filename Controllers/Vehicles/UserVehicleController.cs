@@ -74,7 +74,7 @@ namespace main_service.Controllers.Vehicles
             var userVehicles = _userVehicleRepository.FindByUserId(userId);
             return ResponseHelper<IEnumerable<UserVehicle>>.OkResponse(userVehicles);
         }
-        
+
         [HttpGet]
         [Authorize(Roles = Role.Staff)]
         public JsonResult QueryAll([FromQuery] UserVehicleQuery query)
@@ -113,6 +113,15 @@ namespace main_service.Controllers.Vehicles
             {
                 return ResponseHelper<string>.ErrorResponse(e.Message, "Lỗi khi xóa xe");
             }
+        }
+
+        [HttpGet]
+        [Route("{userVehicleId}/schedule")]
+        [Authorize(Roles = Role.All)]
+        public JsonResult GetVehicleSchedule(int userVehicleId)
+        {
+            var result = _userVehicleRepository.GetSchedule(userVehicleId);
+            return ResponseHelper<IEnumerable<MaintenanceSchedule>>.OkResponse(result);
         }
     }
 }
