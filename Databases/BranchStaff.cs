@@ -10,8 +10,8 @@ namespace main_service.Databases
     {
         [Key]
         public int Id { get; set; }
-        public int? BranchId { get; set; }
-        public int? StaffId { get; set; }
+        public int BranchId { get; set; }
+        public int StaffId { get; set; }
 
         [ForeignKey(nameof(BranchId))]
         [InverseProperty("BranchStaff")]

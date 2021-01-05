@@ -15,6 +15,7 @@ namespace main_service.Databases
         {
         }
 
+        public virtual DbSet<Banner> Banner { get; set; }
         public virtual DbSet<Branch> Branch { get; set; }
         public virtual DbSet<BranchServicePrice> BranchServicePrice { get; set; }
         public virtual DbSet<BranchStaff> BranchStaff { get; set; }
@@ -25,6 +26,7 @@ namespace main_service.Databases
         public virtual DbSet<MaintenanceSchedule> MaintenanceSchedule { get; set; }
         public virtual DbSet<MaintenanceService> MaintenanceService { get; set; }
         public virtual DbSet<Notification> Notification { get; set; }
+        public virtual DbSet<Review> Review { get; set; }
         public virtual DbSet<SparepartCheckDetail> SparepartCheckDetail { get; set; }
         public virtual DbSet<SparepartStatus> SparepartStatus { get; set; }
         public virtual DbSet<User> User { get; set; }
@@ -32,6 +34,7 @@ namespace main_service.Databases
         public virtual DbSet<UserVehicle> UserVehicle { get; set; }
         public virtual DbSet<VehicleCompany> VehicleCompany { get; set; }
         public virtual DbSet<VehicleGroup> VehicleGroup { get; set; }
+        public virtual DbSet<VehicleGroupImage> VehicleGroupImage { get; set; }
         public virtual DbSet<VehicleGroupSparepartItem> VehicleGroupSparepartItem { get; set; }
         public virtual DbSet<VehicleType> VehicleType { get; set; }
 
@@ -46,6 +49,17 @@ namespace main_service.Databases
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Banner>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.HasIndex(e => e.Id)
+                    .HasName("BANNER_Id_uindex")
+                    .IsUnique();
+
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+            });
+
             modelBuilder.Entity<Branch>(entity =>
             {
                 entity.HasKey(e => e.Id)
@@ -248,6 +262,22 @@ namespace main_service.Databases
                     .HasConstraintName("NOTIFICATION_USER_Id_fk");
             });
 
+            modelBuilder.Entity<Review>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("REVIEW_pk")
+                    .IsClustered(false);
+
+                entity.HasIndex(e => e.Id)
+                    .HasName("REVIEW_Id_uindex")
+                    .IsUnique();
+
+                entity.HasOne(d => d.Maintenance)
+                    .WithMany(p => p.Review)
+                    .HasForeignKey(d => d.MaintenanceId)
+                    .HasConstraintName("REVIEW_MAINTENANCE_Id_fk");
+            });
+
             modelBuilder.Entity<SparepartCheckDetail>(entity =>
             {
                 entity.HasKey(e => e.Id)
@@ -367,6 +397,23 @@ namespace main_service.Databases
                     .HasForeignKey(d => d.VehicleTypeId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("VEHICLE_GROUP_VEHICLE_TYPE_Id_fk");
+            });
+
+            modelBuilder.Entity<VehicleGroupImage>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("VEHICLE_GROUP_IMAGE_pk")
+                    .IsClustered(false);
+
+                entity.HasIndex(e => e.Id)
+                    .HasName("VEHICLE_GROUP_IMAGE_Id_uindex")
+                    .IsUnique();
+
+                entity.HasOne(d => d.VehicleGroup)
+                    .WithMany(p => p.VehicleGroupImage)
+                    .HasForeignKey(d => d.VehicleGroupId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("VEHICLE_GROUP_IMAGE_VEHICLE_GROUP_Id_fk");
             });
 
             modelBuilder.Entity<VehicleGroupSparepartItem>(entity =>
