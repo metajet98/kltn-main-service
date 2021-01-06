@@ -221,5 +221,30 @@ namespace main_service.Repositories
                 return false;
             }
         }
+        
+        public bool InsertReview(int maintenanceId, ReviewRequest request, int userId)
+        {
+            try
+            {
+                var maintenance = GetMaintenance(maintenanceId);
+                if (maintenance.UserVehicle.UserId != userId) return false;
+
+                Context.Review.Add(new Review
+                {
+                    Comment = request.Comment,
+                    Star = request.Star,
+                    CreatedDate = DateTime.Now,
+                    MaintenanceId = maintenanceId,
+                    UserId = userId
+                });
+                Context.SaveChanges();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return false;
+            }
+        }
     }
 }

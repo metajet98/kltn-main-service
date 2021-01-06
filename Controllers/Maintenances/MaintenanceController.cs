@@ -64,6 +64,7 @@ namespace main_service.Controllers.Maintenances
                 {
                     _maintenanceRepository.InsertMaintenanceImages(newMaintenance.Id, request.Images);
                 }
+
                 return ResponseHelper<Maintenance>.OkResponse(newMaintenance, "Tạo lượt bảo dưỡng thành công");
             }
             else
@@ -71,7 +72,7 @@ namespace main_service.Controllers.Maintenances
                 return ResponseHelper<object>.ErrorResponse(null, "Bạn hiện tại không ở chi nhánh nào cả!");
             }
         }
-        
+
         [HttpGet]
         [Route("{maintenanceId}/all")]
         [Authorize(Roles = Role.All)]
@@ -80,7 +81,7 @@ namespace main_service.Controllers.Maintenances
             var maintenance = _maintenanceRepository.GetMaintenanceAllDetail(maintenanceId);
             return ResponseHelper<Maintenance>.OkResponse(maintenance);
         }
-        
+
         [HttpGet]
         [Route("{maintenanceId}")]
         [Authorize(Roles = Role.All)]
@@ -101,7 +102,7 @@ namespace main_service.Controllers.Maintenances
                 ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
                 : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
         }
-        
+
         [HttpPost]
         [Route("{maintenanceId}/bill")]
         [Authorize(Roles = Role.Staff)]
@@ -113,7 +114,7 @@ namespace main_service.Controllers.Maintenances
                 ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
                 : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
         }
-        
+
         [HttpPost]
         [Route("{maintenanceId}/images")]
         public JsonResult AddMaintenanceImage(int maintenanceId, [FromBody] ImageRequest image)
@@ -124,7 +125,7 @@ namespace main_service.Controllers.Maintenances
                 ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
                 : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
         }
-        
+
         [HttpPost]
         [Route("{maintenanceId}/start")]
         [Authorize(Roles = Role.StaffMaintenance)]
@@ -148,7 +149,7 @@ namespace main_service.Controllers.Maintenances
                 return ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
             }
         }
-        
+
         [HttpPost]
         [Route("{maintenanceId}/finish")]
         [Authorize(Roles = Role.StaffMaintenance)]
@@ -166,7 +167,7 @@ namespace main_service.Controllers.Maintenances
                 ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
                 : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
         }
-        
+
         [HttpDelete]
         [Route("{maintenanceId}/images/{imageId}")]
         [Authorize(Roles = Role.Staff)]
@@ -178,7 +179,7 @@ namespace main_service.Controllers.Maintenances
                 ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
                 : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
         }
-        
+
         [HttpPost]
         [Route("{maintenanceId}/schedule")]
         [Authorize(Roles = Role.Staff)]
@@ -186,6 +187,19 @@ namespace main_service.Controllers.Maintenances
         {
             var result =
                 _maintenanceRepository.InsertSchedule(maintenanceId, request);
+            return result
+                ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
+                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+        }
+
+        [HttpPost]
+        [Route("{maintenanceId}/review")]
+        [Authorize(Roles = Role.User)]
+        public JsonResult AddReview(int maintenanceId, [FromBody] ReviewRequest request)
+        {
+            var userId = User.Identity.GetId();
+            var result =
+                _maintenanceRepository.InsertReview(maintenanceId, request, userId);
             return result
                 ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
                 : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
