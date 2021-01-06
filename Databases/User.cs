@@ -15,6 +15,7 @@ namespace main_service.Databases
             MaintenanceMaintenanceStaff = new HashSet<Maintenance>();
             MaintenanceReceptionStaff = new HashSet<Maintenance>();
             Notification = new HashSet<Notification>();
+            TopicReply = new HashSet<TopicReply>();
             UserVehicle = new HashSet<UserVehicle>();
         }
 
@@ -51,6 +52,8 @@ namespace main_service.Databases
         public virtual ICollection<Maintenance> MaintenanceReceptionStaff { get; set; }
         [InverseProperty("User")]
         public virtual ICollection<Notification> Notification { get; set; }
+        [InverseProperty("User")]
+        public virtual ICollection<TopicReply> TopicReply { get; set; }
         [InverseProperty("User")]
         public virtual ICollection<UserVehicle> UserVehicle { get; set; }
     }

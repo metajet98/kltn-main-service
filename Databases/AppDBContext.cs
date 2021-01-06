@@ -29,6 +29,9 @@ namespace main_service.Databases
         public virtual DbSet<Review> Review { get; set; }
         public virtual DbSet<SparepartCheckDetail> SparepartCheckDetail { get; set; }
         public virtual DbSet<SparepartStatus> SparepartStatus { get; set; }
+        public virtual DbSet<Topic> Topic { get; set; }
+        public virtual DbSet<TopicImage> TopicImage { get; set; }
+        public virtual DbSet<TopicReply> TopicReply { get; set; }
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<UserAuth> UserAuth { get; set; }
         public virtual DbSet<UserVehicle> UserVehicle { get; set; }
@@ -316,6 +319,57 @@ namespace main_service.Databases
                 entity.HasIndex(e => e.Id)
                     .HasName("SPAREPART_STATUS_Id_uindex")
                     .IsUnique();
+            });
+
+            modelBuilder.Entity<Topic>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("TOPIC_pk")
+                    .IsClustered(false);
+
+                entity.HasIndex(e => e.Id)
+                    .HasName("TOPIC_Id_uindex")
+                    .IsUnique();
+            });
+
+            modelBuilder.Entity<TopicImage>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("TOPIC_IMAGE_pk")
+                    .IsClustered(false);
+
+                entity.HasIndex(e => e.Id)
+                    .HasName("TOPIC_IMAGE_Id_uindex")
+                    .IsUnique();
+
+                entity.HasOne(d => d.Topic)
+                    .WithMany(p => p.TopicImage)
+                    .HasForeignKey(d => d.TopicId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("TOPIC_IMAGE_TOPIC_Id_fk");
+            });
+
+            modelBuilder.Entity<TopicReply>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("TOPIC_REPLY_pk")
+                    .IsClustered(false);
+
+                entity.HasIndex(e => e.Id)
+                    .HasName("TOPIC_REPLY_Id_uindex")
+                    .IsUnique();
+
+                entity.HasOne(d => d.Topic)
+                    .WithMany(p => p.TopicReply)
+                    .HasForeignKey(d => d.TopicId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("TOPIC_REPLY_TOPIC_Id_fk");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.TopicReply)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("TOPIC_REPLY_USER_Id_fk");
             });
 
             modelBuilder.Entity<User>(entity =>
