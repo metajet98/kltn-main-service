@@ -330,6 +330,12 @@ namespace main_service.Databases
                 entity.HasIndex(e => e.Id)
                     .HasName("TOPIC_Id_uindex")
                     .IsUnique();
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Topic)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("TOPIC_USER_Id_fk");
             });
 
             modelBuilder.Entity<TopicImage>(entity =>

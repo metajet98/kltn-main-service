@@ -24,6 +24,9 @@ namespace main_service.Databases
         [Column(TypeName = "datetime")]
         public DateTime CreatedDate { get; set; }
 
+        [ForeignKey(nameof(UserId))]
+        [InverseProperty("Topic")]
+        public virtual User User { get; set; }
         [InverseProperty("Topic")]
         public virtual ICollection<TopicImage> TopicImage { get; set; }
         [InverseProperty("Topic")]
