@@ -85,6 +85,7 @@ namespace main_service
             services.AddScoped<FcmService>();
             services.AddScoped<MaintenanceRepository>();
             services.AddScoped<BranchStaffRepository>();
+            services.AddScoped<TopicRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
