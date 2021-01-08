@@ -19,6 +19,7 @@ namespace main_service.Databases
         public virtual DbSet<Branch> Branch { get; set; }
         public virtual DbSet<BranchServicePrice> BranchServicePrice { get; set; }
         public virtual DbSet<BranchStaff> BranchStaff { get; set; }
+        public virtual DbSet<CustomerCalender> CustomerCalender { get; set; }
         public virtual DbSet<FcmToken> FcmToken { get; set; }
         public virtual DbSet<Maintenance> Maintenance { get; set; }
         public virtual DbSet<MaintenanceBillDetail> MaintenanceBillDetail { get; set; }
@@ -118,6 +119,29 @@ namespace main_service.Databases
                     .HasForeignKey(d => d.StaffId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("BRANCH_STAFF_USER_Id_fk");
+            });
+
+            modelBuilder.Entity<CustomerCalender>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("CUSTOMER_CALENDER_pk")
+                    .IsClustered(false);
+
+                entity.HasIndex(e => e.Id)
+                    .HasName("CUSTOMER_CALENDER_Id_uindex_2")
+                    .IsUnique();
+
+                entity.HasOne(d => d.Branch)
+                    .WithMany(p => p.CustomerCalender)
+                    .HasForeignKey(d => d.BranchId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("CUSTOMER_CALENDER_BRANCH_Id_fk");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.CustomerCalender)
+                    .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("CUSTOMER_CALENDER_USER_Id_fk");
             });
 
             modelBuilder.Entity<FcmToken>(entity =>
