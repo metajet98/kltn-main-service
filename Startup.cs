@@ -1,6 +1,7 @@
 using System.Text;
 using main_service.Databases;
 using main_service.Repositories;
+using main_service.RestApi.Converters;
 using main_service.Services;
 using main_service.Storage;
 using main_service.Utils.EncryptionHelper;
@@ -42,6 +43,12 @@ namespace main_service
             services.AddControllers().AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
+                });
+            
             services.AddDbContext<AppDBContext>(options =>
             {
                 options.UseSqlServer(Configuration.GetConnectionString("MaintenanceSystem"));
@@ -86,6 +93,7 @@ namespace main_service
             services.AddScoped<MaintenanceRepository>();
             services.AddScoped<BranchStaffRepository>();
             services.AddScoped<TopicRepository>();
+            services.AddScoped<UserCalenderRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

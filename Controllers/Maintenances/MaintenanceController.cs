@@ -30,11 +30,9 @@ namespace main_service.Controllers.Maintenances
 
         [HttpGet]
         [Authorize(Roles = Role.All)]
-        public JsonResult GetUserBikeMaintenances([FromQuery] int userVehicleId)
+        public JsonResult Query([FromQuery] int? userVehicleId, [FromQuery] int? staffId)
         {
-            var result =
-                _maintenanceRepository.Get(x => x.UserVehicleId.Equals(userVehicleId), includeProperties: "Branch");
-            return ResponseHelper<IEnumerable<Maintenance>>.OkResponse(result);
+            return ResponseHelper<IEnumerable<Maintenance>>.OkResponse(_maintenanceRepository.Query(userVehicleId, staffId));
         }
 
         [HttpPost]
@@ -56,6 +54,7 @@ namespace main_service.Controllers.Maintenances
                     Status = 0,
                     MotorWash = request.MotorWash,
                     SparepartBack = request.SparepartBack,
+                    Title = request.Title,
                 };
                 _maintenanceRepository.Insert(newMaintenance);
                 _maintenanceRepository.Save();

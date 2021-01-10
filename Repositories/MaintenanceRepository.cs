@@ -60,6 +60,23 @@ namespace main_service.Repositories
             return result;
         }
 
+        public IEnumerable<Maintenance> Query(int? userVehicleId, int? staffId)
+        {
+            var query = DbSet.AsQueryable();
+            if (userVehicleId != null)
+            {
+                query = query.Where(x => x.UserVehicleId.Equals(userVehicleId));
+            }
+
+            if (staffId != null)
+            {
+                query = query.Where(x => x.MaintenanceStaffId.Equals(staffId) || x.ReceptionStaffId.Equals(staffId));
+            }
+
+            query = query.Include(x => x.Branch);
+            return query.ToList();
+        }
+
         public bool InsertMaintenanceChecks(int maintenanceId, List<SparePartMaintenanceCheck> listCheck)
         {
             try
@@ -173,11 +190,19 @@ namespace main_service.Repositories
         public bool UpdateMaintainer(int maintenanceId, int maintainerId)
         {
             var maintenance = DbSet.FirstOrDefault(x => x.Id.Equals(maintenanceId));
-            if (maintenance == null || maintenance.Status != MaintenanceStatus.Created) return false;
-            maintenance.MaintenanceStaffId = maintainerId;
-            maintenance.Status = MaintenanceStatus.UnderMaintenance;
-            Context.SaveChanges();
-            return true;
+            if (maintenance == null) return false;
+            switch (maintenance.Status)
+            {
+                case MaintenanceStatus.UnderMaintenance:
+                    return true;
+                case MaintenanceStatus.Created:
+                    maintenance.MaintenanceStaffId = maintainerId;
+                    maintenance.Status = MaintenanceStatus.UnderMaintenance;
+                    Context.SaveChanges();
+                    return true;
+                default:
+                    return false;
+            }
         }
         
         public bool FinishMaintenance(int maintenanceId)
