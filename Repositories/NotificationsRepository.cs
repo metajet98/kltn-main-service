@@ -28,5 +28,11 @@ namespace main_service.Repositories
             IQueryable<Banner> query = Context.Banner.AsQueryable();
             return query.ToList();
         }
+        
+        public IEnumerable<News> QueryNews()
+        {
+            IQueryable<News> query = Context.News.AsQueryable();
+            return query.ToList();
+        }
     }
 }

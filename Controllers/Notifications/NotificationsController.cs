@@ -22,7 +22,7 @@ namespace main_service.Controllers.Notifications
         [HttpGet]
         [Route("notifications")]
         [Authorize(Roles = Constants.Role.User)]
-        public JsonResult GetNotification([FromQuery] NotificationQuery query)
+        public JsonResult GetNotifications([FromQuery] NotificationQuery query)
         {
             var notifications = _notificationsRepository.QueryNotifications(query);
             return ResponseHelper<IEnumerable<Notification>>.OkResponse(notifications);
@@ -31,10 +31,19 @@ namespace main_service.Controllers.Notifications
         [HttpGet]
         [Route("banners")]
         [Authorize(Roles = Constants.Role.User)]
-        public JsonResult GetBanner()
+        public JsonResult GetBanners()
         {
             var banners = _notificationsRepository.QueryBanners();
             return ResponseHelper<IEnumerable<Banner>>.OkResponse(banners);
+        }
+        
+        [HttpGet]
+        [Route("news")]
+        [Authorize(Roles = Constants.Role.User)]
+        public JsonResult GetNews()
+        {
+            var news = _notificationsRepository.QueryNews();
+            return ResponseHelper<IEnumerable<News>>.OkResponse(news);
         }
     }
 }
