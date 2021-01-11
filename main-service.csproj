@@ -21,7 +21,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Controllers\Notifications" />
       <Folder Include="Databases" />
     </ItemGroup>
     <ItemGroup>

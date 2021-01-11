@@ -73,7 +73,10 @@ namespace main_service.Repositories
                 query = query.Where(x => x.MaintenanceStaffId.Equals(staffId) || x.ReceptionStaffId.Equals(staffId));
             }
 
+            query = query.OrderByDescending(x => x.CreatedDate);
+
             query = query.Include(x => x.Branch);
+            query = query.Include(x => x.UserVehicle);
             return query.ToList();
         }
 

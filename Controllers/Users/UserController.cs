@@ -62,7 +62,7 @@ namespace main_service.Controllers.Users
         public JsonResult Self()
         {
             var userId = User.Identity.GetId();
-            return ResponseHelper<User>.OkResponse(_userRepository.GetById(userId));
+            return ResponseHelper<User>.OkResponse(_userRepository.GetUserInfo(userId));
         }
         
         [HttpGet]
