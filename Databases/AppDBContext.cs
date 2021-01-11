@@ -26,6 +26,7 @@ namespace main_service.Databases
         public virtual DbSet<MaintenanceImage> MaintenanceImage { get; set; }
         public virtual DbSet<MaintenanceSchedule> MaintenanceSchedule { get; set; }
         public virtual DbSet<MaintenanceService> MaintenanceService { get; set; }
+        public virtual DbSet<News> News { get; set; }
         public virtual DbSet<Notification> Notification { get; set; }
         public virtual DbSet<Review> Review { get; set; }
         public virtual DbSet<SparepartCheckDetail> SparepartCheckDetail { get; set; }
@@ -270,6 +271,17 @@ namespace main_service.Databases
                     .HasForeignKey(d => d.VehicleGroupId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("MAINTENANCE_ITEM_VEHICLE_GROUP_Id_fk");
+            });
+
+            modelBuilder.Entity<News>(entity =>
+            {
+                entity.HasKey(e => e.Id)
+                    .HasName("NEWS_pk")
+                    .IsClustered(false);
+
+                entity.HasIndex(e => e.Id)
+                    .HasName("NEWS_Id_uindex")
+                    .IsUnique();
             });
 
             modelBuilder.Entity<Notification>(entity =>
