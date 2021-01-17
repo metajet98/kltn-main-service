@@ -60,7 +60,7 @@ namespace main_service.Repositories
             return result;
         }
 
-        public IEnumerable<Maintenance> Query(int? userVehicleId, int? staffId)
+        public IEnumerable<Maintenance> Query(int? userVehicleId, int? staffId, int? branchId, DateTime? date)
         {
             var query = DbSet.AsQueryable();
             if (userVehicleId != null)
@@ -71,6 +71,18 @@ namespace main_service.Repositories
             if (staffId != null)
             {
                 query = query.Where(x => x.MaintenanceStaffId.Equals(staffId) || x.ReceptionStaffId.Equals(staffId));
+            }
+
+            if (branchId != null)
+            {
+                query = query.Where(x => x.BranchId.Equals(branchId));
+            }
+
+            if (date != null)
+            {
+                query = query.Where(x => x.CreatedDate.Value.Year == date.Value.Year
+                                         && x.CreatedDate.Value.Month == date.Value.Month
+                                         && x.CreatedDate.Value.Day == date.Value.Day);
             }
 
             query = query.OrderByDescending(x => x.CreatedDate);
@@ -119,7 +131,6 @@ namespace main_service.Repositories
             {
                 return false;
             }
-            
         }
 
         public bool InsertMaintenanceBill(MaintenanceBillRequest request, int maintenanceId)
@@ -214,7 +225,7 @@ namespace main_service.Repositories
                     return false;
             }
         }
-        
+
         public bool FinishMaintenance(int maintenanceId)
         {
             try
@@ -256,7 +267,7 @@ namespace main_service.Repositories
                 return false;
             }
         }
-        
+
         public bool InsertReview(int maintenanceId, ReviewRequest request, int userId)
         {
             try

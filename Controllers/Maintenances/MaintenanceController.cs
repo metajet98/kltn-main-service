@@ -27,10 +27,10 @@ namespace main_service.Controllers.Maintenances
 
         [HttpGet]
         [Authorize(Roles = Role.All)]
-        public JsonResult Query([FromQuery] int? userVehicleId, [FromQuery] int? staffId)
+        public JsonResult Query([FromQuery] int? userVehicleId, [FromQuery] int? staffId, [FromQuery] int? branchId, [FromQuery] DateTime? date)
         {
             return ResponseHelper<IEnumerable<Maintenance>>.OkResponse(
-                _maintenanceRepository.Query(userVehicleId, staffId));
+                _maintenanceRepository.Query(userVehicleId, staffId, branchId, date));
         }
 
         [HttpPost]

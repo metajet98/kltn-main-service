@@ -58,7 +58,7 @@ namespace main_service.Controllers.Users
         
         [HttpGet]
         [Route("self")]
-        [Authorize(Roles = Role.SystemUser)]
+        [Authorize(Roles = Role.All)]
         public JsonResult Self()
         {
             var userId = User.Identity.GetId();

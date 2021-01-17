@@ -13,7 +13,6 @@ namespace main_service.RestApi.Requests
     {
         public int? UserId { get; set; }
         public int? BranchId { get; set; }
-        public DateTime? From { get; set; }
-        public DateTime? To { get; set; }
+        public DateTime? Date { get; set; } 
     }
 }

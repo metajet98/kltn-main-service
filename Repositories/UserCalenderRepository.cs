@@ -63,11 +63,13 @@ namespace main_service.Repositories
                 query = query.Where(x => x.BranchId.Equals(queryData.BranchId));
             }
 
-            if (queryData.From != null && queryData.To != null)
+            if (queryData.Date != null)
             {
                 query = query
                     .Where(x =>
-                        x.Time >= queryData.From && x.Time <= queryData.To);
+                        x.Time.Year == queryData.Date.Value.Year 
+                        && x.Time.Month == queryData.Date.Value.Month
+                        && x.Time.Day == queryData.Date.Value.Day);
             }
 
             query = query
