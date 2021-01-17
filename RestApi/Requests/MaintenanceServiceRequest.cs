@@ -6,5 +6,6 @@ namespace main_service.RestApi.Requests
         public string Name { get; set; }
         public string? Description { get; set; }
         public int? WarrantyPeriod { get; set; }
+        public int? WarrantyOdo { get; set; }
     }
 }

@@ -42,7 +42,9 @@ namespace main_service.Controllers.Maintenances
             {
                 Name = request.Name,
                 Description = request.Description,
-                VehicleGroupId = request.VehicleGroupId
+                VehicleGroupId = request.VehicleGroupId,
+                WarrantyOdo = request.WarrantyOdo,
+                WarrantyPeriod = request.WarrantyPeriod
             };
             _maintenanceServiceRepository.Insert(newMaintenanceService);
             _maintenanceServiceRepository.Save();

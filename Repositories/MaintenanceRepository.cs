@@ -148,9 +148,16 @@ namespace main_service.Repositories
             }
             else
             {
-                item.Quantity = request.Quantity;
-                item.TotalPrice = request.Quantity * (servicePrice.LaborCost + servicePrice.SparePartPrice);
-                Context.MaintenanceBillDetail.Update(item);
+                if (request.Quantity > 0)
+                {
+                    item.Quantity = request.Quantity;
+                    item.TotalPrice = request.Quantity * (servicePrice.LaborCost + servicePrice.SparePartPrice);
+                    Context.MaintenanceBillDetail.Update(item);
+                }
+                else
+                {
+                    Context.MaintenanceBillDetail.Remove(item);
+                }
             }
 
             Context.SaveChanges();
