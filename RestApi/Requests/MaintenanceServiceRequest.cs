@@ -5,5 +5,6 @@ namespace main_service.RestApi.Requests
         public int VehicleGroupId { get; set; }
         public string Name { get; set; }
         public string? Description { get; set; }
+        public int? WarrantyPeriod { get; set; }
     }
 }

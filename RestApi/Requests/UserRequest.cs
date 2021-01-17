@@ -12,5 +12,6 @@ namespace main_service.RestApi.Requests
         public string Address { get; set; }
         public DateTime? Birthday { get; set; }
         public string Password { get; set; }
+        public int? BranchId { get; set; }
     }
 }

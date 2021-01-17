@@ -91,7 +91,6 @@ namespace main_service
             services.AddScoped<FcmTokenRepository>();
             services.AddScoped<FcmService>();
             services.AddScoped<MaintenanceRepository>();
-            services.AddScoped<BranchStaffRepository>();
             services.AddScoped<TopicRepository>();
             services.AddScoped<UserCalenderRepository>();
             services.AddScoped<NotificationsRepository>();

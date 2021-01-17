@@ -19,15 +19,13 @@ namespace main_service.Controllers.Staffs
         private readonly UserRepository _userRepository;
         private readonly UserAuthRepository _userAuthRepository;
         private readonly IEncryptionHelper _encryptionHelper;
-        private readonly BranchStaffRepository _branchStaffRepository;
         private readonly BranchRepository _branchRepository;
 
-        public StaffController(UserRepository userRepository, UserAuthRepository userAuthRepository, IEncryptionHelper encryptionHelper, BranchStaffRepository branchStaffRepository, BranchRepository branchRepository)
+        public StaffController(UserRepository userRepository, UserAuthRepository userAuthRepository, IEncryptionHelper encryptionHelper, BranchRepository branchRepository)
         {
             _userRepository = userRepository;
             _userAuthRepository = userAuthRepository;
             _encryptionHelper = encryptionHelper;
-            _branchStaffRepository = branchStaffRepository;
             _branchRepository = branchRepository;
         }
         
@@ -43,8 +41,9 @@ namespace main_service.Controllers.Staffs
                 Email = userRequest.Email,
                 FullName = userRequest.FullName,
                 PhoneNumber = userRequest.PhoneNumber,
-                Role = Constants.Role.StaffMaintenance,
-                CreatedDate = DateTime.Now
+                Role = Role.StaffMaintenance,
+                CreatedDate = DateTime.Now,
+                BranchId = userRequest.BranchId
             };
             _userRepository.Insert(newUser);
             _userRepository.Save();
@@ -68,7 +67,8 @@ namespace main_service.Controllers.Staffs
                 FullName = userRequest.FullName,
                 PhoneNumber = userRequest.PhoneNumber,
                 Role = Constants.Role.StaffDesk,
-                CreatedDate = DateTime.Now
+                CreatedDate = DateTime.Now,
+                BranchId = userRequest.BranchId
             };
             _userRepository.Insert(newUser);
             _userRepository.Save();
@@ -83,8 +83,8 @@ namespace main_service.Controllers.Staffs
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult GetAll()
         {
-            var staff = _branchStaffRepository.Get(includeProperties: "Branch,Staff");
-            return ResponseHelper<IEnumerable<BranchStaff>>.OkResponse(staff);
+            var staff = _userRepository.Get(x => x.Role.Equals(Role.StaffMaintenance) || x.Role.Equals(Role.StaffDesk), includeProperties: "Branch,Staff");
+            return ResponseHelper<IEnumerable<User>>.OkResponse(staff);
         }
         
         [HttpPost]
@@ -94,25 +94,13 @@ namespace main_service.Controllers.Staffs
         {
             var branch = _branchRepository.GetById(request.BranchId);
             if(branch == null) return ResponseHelper<string>.ErrorResponse(null, "Chi nhánh không tồn tại!");
-            var staff = _branchStaffRepository.Get(x => x.StaffId.Equals(staffId)).FirstOrDefault();
-            if (staff != null)
-            {
-                staff.BranchId = request.BranchId;
-                _branchStaffRepository.Update(staff);
-                _branchStaffRepository.Save();
-                return ResponseHelper<string>.OkResponse(null, "Thanh đổi chi nhánh cho nhân viên thành công!");
-            }
-            else
-            {
-                var newBranchStaff = new BranchStaff
-                {
-                    BranchId = request.BranchId,
-                    StaffId = staffId
-                };
-                _branchStaffRepository.Insert(newBranchStaff);
-                _branchStaffRepository.Save();
-                return ResponseHelper<string>.OkResponse(null, "Thêm nhân viên vào chi nhánh thành công!");
-            }
+            var staff = _userRepository.Get(x => x.Id.Equals(staffId)).FirstOrDefault();
+            if (staff == null) return ResponseHelper<string>.ErrorResponse(null, "Nhân viên!");
+            
+            staff.BranchId = request.BranchId;
+            _userRepository.Update(staff);
+            _userRepository.Save();
+            return ResponseHelper<string>.OkResponse(null, "Thanh đổi chi nhánh cho nhân viên thành công!");
         }
     }
 }

@@ -21,8 +21,7 @@ namespace main_service.Repositories
         public User? GetUserInfo(int userId)
         {
             var query = DbSet.Where(x => x.Id.Equals(userId))
-                .Include(x => x.UserAuth)
-                .Include(x => x.BranchStaff).ThenInclude(y => y.Branch);
+                .Include(x => x.Branch);
             return query.FirstOrDefault();
         }
     }

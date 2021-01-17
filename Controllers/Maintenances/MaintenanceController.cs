@@ -17,31 +17,29 @@ namespace main_service.Controllers.Maintenances
     public class MaintenanceController : ControllerBase
     {
         private readonly MaintenanceRepository _maintenanceRepository;
-        private readonly BranchStaffRepository _branchStaffRepository;
         private readonly UserRepository _userRepository;
 
-        public MaintenanceController(MaintenanceRepository maintenanceRepository, UserRepository userRepository,
-            BranchStaffRepository branchStaffRepository)
+        public MaintenanceController(MaintenanceRepository maintenanceRepository, UserRepository userRepository)
         {
             _maintenanceRepository = maintenanceRepository;
             _userRepository = userRepository;
-            _branchStaffRepository = branchStaffRepository;
         }
 
         [HttpGet]
         [Authorize(Roles = Role.All)]
         public JsonResult Query([FromQuery] int? userVehicleId, [FromQuery] int? staffId)
         {
-            return ResponseHelper<IEnumerable<Maintenance>>.OkResponse(_maintenanceRepository.Query(userVehicleId, staffId));
+            return ResponseHelper<IEnumerable<Maintenance>>.OkResponse(
+                _maintenanceRepository.Query(userVehicleId, staffId));
         }
 
         [HttpPost]
         [Authorize(Roles = Role.StaffMaintenance)]
         public JsonResult CreateMaintenance([FromBody] MaintenanceRequest request)
         {
-            var staff = _branchStaffRepository
-                .Get(x => x.StaffId.Equals(User.Identity.GetId()), includeProperties: "Branch").FirstOrDefault();
-            if (staff?.Branch != null)
+            var staff = _userRepository
+                .Get(x => x.Id.Equals(User.Identity.GetId()), includeProperties: "Branch").FirstOrDefault();
+            if (staff?.BranchId != null)
             {
                 var newMaintenance = new Maintenance
                 {
@@ -49,7 +47,7 @@ namespace main_service.Controllers.Maintenances
                     Notes = request.Notes,
                     Odometer = request.Odometer,
                     CreatedDate = DateTime.Now,
-                    ReceptionStaffId = staff.StaffId,
+                    ReceptionStaffId = staff.Id,
                     UserVehicleId = request.UserVehicleId,
                     Status = 0,
                     MotorWash = request.MotorWash,
