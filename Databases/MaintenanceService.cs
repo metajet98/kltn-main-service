@@ -20,6 +20,8 @@ namespace main_service.Databases
         [StringLength(50)]
         public string Name { get; set; }
         public string? Description { get; set; }
+        public int? WarrantyPeriod { get; set; }
+        public int? WarrantyOdo { get; set; }
 
         [ForeignKey(nameof(VehicleGroupId))]
         [InverseProperty("MaintenanceService")]
