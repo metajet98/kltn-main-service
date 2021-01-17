@@ -95,6 +95,7 @@ namespace main_service
             services.AddScoped<TopicRepository>();
             services.AddScoped<UserCalenderRepository>();
             services.AddScoped<NotificationsRepository>();
+            services.AddScoped<StatisticRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
