@@ -10,7 +10,6 @@ namespace main_service.Databases
     {
         public User()
         {
-            BranchStaff = new HashSet<BranchStaff>();
             CustomerCalender = new HashSet<CustomerCalender>();
             FcmToken = new HashSet<FcmToken>();
             MaintenanceMaintenanceStaff = new HashSet<Maintenance>();
@@ -41,11 +40,13 @@ namespace main_service.Databases
         [Required]
         [StringLength(20)]
         public string Role { get; set; }
+        public int? BranchId { get; set; }
 
+        [ForeignKey(nameof(BranchId))]
+        [InverseProperty("User")]
+        public virtual Branch Branch { get; set; }
         [InverseProperty("User")]
         public virtual UserAuth UserAuth { get; set; }
-        [InverseProperty("Staff")]
-        public virtual ICollection<BranchStaff> BranchStaff { get; set; }
         [InverseProperty("User")]
         public virtual ICollection<CustomerCalender> CustomerCalender { get; set; }
         [InverseProperty("User")]

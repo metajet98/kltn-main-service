@@ -11,9 +11,9 @@ namespace main_service.Databases
         public Branch()
         {
             BranchServicePrice = new HashSet<BranchServicePrice>();
-            BranchStaff = new HashSet<BranchStaff>();
             CustomerCalender = new HashSet<CustomerCalender>();
             Maintenance = new HashSet<Maintenance>();
+            User = new HashSet<User>();
         }
 
         [Key]
@@ -34,10 +34,10 @@ namespace main_service.Databases
         [InverseProperty("Branch")]
         public virtual ICollection<BranchServicePrice> BranchServicePrice { get; set; }
         [InverseProperty("Branch")]
-        public virtual ICollection<BranchStaff> BranchStaff { get; set; }
-        [InverseProperty("Branch")]
         public virtual ICollection<CustomerCalender> CustomerCalender { get; set; }
         [InverseProperty("Branch")]
         public virtual ICollection<Maintenance> Maintenance { get; set; }
+        [InverseProperty("Branch")]
+        public virtual ICollection<User> User { get; set; }
     }
 }

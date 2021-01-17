@@ -18,7 +18,6 @@ namespace main_service.Databases
         public virtual DbSet<Banner> Banner { get; set; }
         public virtual DbSet<Branch> Branch { get; set; }
         public virtual DbSet<BranchServicePrice> BranchServicePrice { get; set; }
-        public virtual DbSet<BranchStaff> BranchStaff { get; set; }
         public virtual DbSet<CustomerCalender> CustomerCalender { get; set; }
         public virtual DbSet<FcmToken> FcmToken { get; set; }
         public virtual DbSet<Maintenance> Maintenance { get; set; }
@@ -97,29 +96,6 @@ namespace main_service.Databases
                     .HasForeignKey(d => d.MaintenanceServiceId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("BRANCH_MAINTENANCE_ITEM_PRICE_MAINTENANCE_ITEM_Id_fk");
-            });
-
-            modelBuilder.Entity<BranchStaff>(entity =>
-            {
-                entity.HasKey(e => e.Id)
-                    .HasName("BRANCH_STAFF_pk")
-                    .IsClustered(false);
-
-                entity.HasIndex(e => e.Id)
-                    .HasName("BRANCH_STAFF_Id_uindex")
-                    .IsUnique();
-
-                entity.HasOne(d => d.Branch)
-                    .WithMany(p => p.BranchStaff)
-                    .HasForeignKey(d => d.BranchId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("BRANCH_STAFF_BRANCH_Id_fk");
-
-                entity.HasOne(d => d.Staff)
-                    .WithMany(p => p.BranchStaff)
-                    .HasForeignKey(d => d.StaffId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("BRANCH_STAFF_USER_Id_fk");
             });
 
             modelBuilder.Entity<CustomerCalender>(entity =>
@@ -423,6 +399,11 @@ namespace main_service.Databases
                 entity.HasIndex(e => e.PhoneNumber)
                     .HasName("USER_PhoneNumber_uindex")
                     .IsUnique();
+
+                entity.HasOne(d => d.Branch)
+                    .WithMany(p => p.User)
+                    .HasForeignKey(d => d.BranchId)
+                    .HasConstraintName("USER_BRANCH_Id_fk");
             });
 
             modelBuilder.Entity<UserAuth>(entity =>
