@@ -59,7 +59,7 @@ namespace main_service.Controllers.Vehicles
 
             _userVehicleRepository.Insert(newUserVehicle);
             _userVehicleRepository.Save();
-            _fcmService.SendMessage(
+            _fcmService.SendMessages(
                 new List<int> {userId},
                 FcmData.CreateFcmData("create_bike_success", new Dictionary<string, string> {{"status", "done"}}));
             return ResponseHelper<string>.OkResponse(null, "Thêm xe thành công");

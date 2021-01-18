@@ -7,6 +7,8 @@ using main_service.Extensions;
 using main_service.Helpers;
 using main_service.Repositories;
 using main_service.RestApi.Requests;
+using main_service.RestApi.Response;
+using main_service.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,16 +20,26 @@ namespace main_service.Controllers.Maintenances
     {
         private readonly MaintenanceRepository _maintenanceRepository;
         private readonly UserRepository _userRepository;
+        private readonly UserVehicleRepository _userVehicleRepository;
 
-        public MaintenanceController(MaintenanceRepository maintenanceRepository, UserRepository userRepository)
+        private readonly NotificationsRepository _notificationsRepository;
+        private readonly FcmService _fcmService;
+
+        public MaintenanceController(MaintenanceRepository maintenanceRepository, UserRepository userRepository,
+            NotificationsRepository notificationsRepository, FcmService fcmService,
+            UserVehicleRepository userVehicleRepository)
         {
             _maintenanceRepository = maintenanceRepository;
             _userRepository = userRepository;
+            _notificationsRepository = notificationsRepository;
+            _fcmService = fcmService;
+            _userVehicleRepository = userVehicleRepository;
         }
 
         [HttpGet]
         [Authorize(Roles = Role.All)]
-        public JsonResult Query([FromQuery] int? userVehicleId, [FromQuery] int? staffId, [FromQuery] int? branchId, [FromQuery] DateTime? date)
+        public JsonResult Query([FromQuery] int? userVehicleId, [FromQuery] int? staffId, [FromQuery] int? branchId,
+            [FromQuery] DateTime? date)
         {
             return ResponseHelper<IEnumerable<Maintenance>>.OkResponse(
                 _maintenanceRepository.Query(userVehicleId, staffId, branchId, date));
@@ -60,6 +72,27 @@ namespace main_service.Controllers.Maintenances
                 if (request.Images != null)
                 {
                     _maintenanceRepository.InsertMaintenanceImages(newMaintenance.Id, request.Images);
+                }
+                
+                var userId = _userVehicleRepository.GetById(request.UserVehicleId)?.UserId;
+
+                if (userId != null)
+                {
+                    var data = FcmData.CreateFcmData("new_maintenance", null);
+                    var notify = FcmData.CreateFcmNotification(
+                        "Bạn vừa được tạo một lượt bảo dưỡng", 
+                        "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe",
+                        null);
+                    _fcmService.SendMessage(userId.Value, data, notify);
+                    _notificationsRepository.Insert(new Notification
+                    {
+                        UserId = userId,
+                        Description = "Bạn vừa được tạo một lượt bảo dưỡng",
+                        Title = "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe",
+                        Activity = "new_maintenance",
+                        CreatedDate = DateTime.Now,
+                    });
+                    _notificationsRepository.Save();
                 }
 
                 return ResponseHelper<Maintenance>.OkResponse(newMaintenance, "Tạo lượt bảo dưỡng thành công");
@@ -160,6 +193,28 @@ namespace main_service.Controllers.Maintenances
             }
 
             var result = _maintenanceRepository.FinishMaintenance(maintenanceId);
+
+            var maintenance = _maintenanceRepository.GetMaintenance(maintenanceId);
+            var userId = maintenance.UserVehicle.UserId;
+            if (userId != null)
+            {
+                var data = FcmData.CreateFcmData("finish_maintenance", null);
+                var notify = FcmData.CreateFcmNotification(
+                    "Lượt bảo dưỡng vừa kết thúc", 
+                    "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe",
+                    null);
+                _fcmService.SendMessage(userId.Value, data, notify);
+                _notificationsRepository.Insert(new Notification
+                {
+                    UserId = userId,
+                    Description = "Lượt bảo dưỡng vừa kết thúc",
+                    Title = "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe của tôi",
+                    Activity = "finish_maintenance",
+                    CreatedDate = DateTime.Now,
+                });
+                _notificationsRepository.Save();
+            }
+
             return result
                 ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
                 : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");

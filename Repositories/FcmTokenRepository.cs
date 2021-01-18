@@ -50,5 +50,11 @@ namespace main_service.Repositories
                 select token.Token;
             return query.ToList();
         }
+        
+        public string GetToken(int userId)
+        {
+            var token = DbSet.FirstOrDefault(x => x.UserId.Equals(userId))?.Token;
+            return token;
+        }
     }
 }

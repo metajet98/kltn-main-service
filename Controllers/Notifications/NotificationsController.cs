@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using main_service.Databases;
+using main_service.Extensions;
 using main_service.Helpers;
 using main_service.Repositories;
 using main_service.RestApi.Requests;
@@ -24,6 +25,10 @@ namespace main_service.Controllers.Notifications
         [Authorize(Roles = Constants.Role.User)]
         public JsonResult GetNotifications([FromQuery] NotificationQuery query)
         {
+            if (query.UserId == null)
+            {
+                query.UserId = User.Identity.GetId();
+            }
             var notifications = _notificationsRepository.QueryNotifications(query);
             return ResponseHelper<IEnumerable<Notification>>.OkResponse(notifications);
         }

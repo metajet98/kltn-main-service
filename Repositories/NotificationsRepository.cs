@@ -20,6 +20,8 @@ namespace main_service.Repositories
                 query = query.Where(x => x.UserId.Equals(notificationQuery.UserId));
             }
 
+            query = query.OrderByDescending(x => x.CreatedDate);
+
             return query.ToList();
         }
         
