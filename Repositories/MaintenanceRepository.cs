@@ -6,6 +6,7 @@ using main_service.Databases;
 using main_service.Repositories.Base;
 using main_service.RestApi.Requests;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace main_service.Repositories
 {
@@ -230,9 +231,47 @@ namespace main_service.Repositories
         {
             try
             {
-                var maintenance = DbSet.FirstOrDefault(x => x.Id.Equals(maintenanceId));
+                var maintenance = DbSet
+                    .Include(x => x.MaintenanceBillDetail)
+                    .FirstOrDefault(x => x.Id.Equals(maintenanceId));
                 if (maintenance == null) return false;
                 maintenance.Status = MaintenanceStatus.Finish;
+
+                var billDetails = Context.MaintenanceBillDetail
+                    .Include(x => x.BranchServicePrice)
+                    .ThenInclude(y => y.MaintenanceService)
+                    .Where(x => x.MaintenanceId.Equals(maintenanceId))
+                    .ToList();
+
+                billDetails.ForEach(x =>
+                {
+                    if (x.BranchServicePrice.MaintenanceService.WarrantyOdo != null ||
+                        x.BranchServicePrice.MaintenanceService.WarrantyPeriod != null)
+                    {
+                        DateTime? date = null;
+                        int? odo = null;
+                        if (x.BranchServicePrice.MaintenanceService.WarrantyPeriod != null)
+                        {
+                            date = DateTime.Now.AddMonths(x.BranchServicePrice.MaintenanceService.WarrantyPeriod.Value);
+                        }
+
+                        if (maintenance.Odometer != null && x.BranchServicePrice.MaintenanceService.WarrantyOdo != null)
+                        {
+                            odo = maintenance.Odometer + x.BranchServicePrice.MaintenanceService.WarrantyOdo;
+                        }
+
+                        Context.MaintenanceSchedule.Add(new MaintenanceSchedule
+                        {
+                            MaintenanceId = maintenanceId,
+                            UserVehicleId = maintenance.UserVehicleId,
+                            Date = date,
+                            Odometer = odo,
+                            Title = "Bảo hành " + x.BranchServicePrice.MaintenanceService.Name,
+                            Content = "Vui lòng mang xe ra chi nhánh để kiểm tra khi hết hạn bảo hành"
+                        });
+                    }
+                });
+
                 Context.SaveChanges();
                 return true;
             }

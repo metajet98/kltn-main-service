@@ -204,15 +204,24 @@ namespace main_service.Controllers.Maintenances
                     "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe",
                     null);
                 _fcmService.SendMessage(userId.Value, data, notify);
-                _notificationsRepository.Insert(new Notification
+                try
                 {
-                    UserId = userId,
-                    Description = "Lượt bảo dưỡng vừa kết thúc",
-                    Title = "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe của tôi",
-                    Activity = "finish_maintenance",
-                    CreatedDate = DateTime.Now,
-                });
-                _notificationsRepository.Save();
+                    var newNotification = new Notification
+                    {
+                        UserId = userId.Value,
+                        Description = "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe của tôi",
+                        Title = "Lượt bảo dưỡng vừa kết thúc",
+                        Activity = "finish_maintenance",
+                        CreatedDate = DateTime.Now,
+                    };
+                    _notificationsRepository.Insert(newNotification);
+                    _notificationsRepository.Save();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    return ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+                }
             }
 
             return result
