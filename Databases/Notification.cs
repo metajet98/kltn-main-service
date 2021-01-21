@@ -17,7 +17,7 @@ namespace main_service.Databases
         public string? Description { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime? CreatedDate { get; set; }
-        public string Activity { get; set; }
+        public string? Activity { get; set; }
 
         [ForeignKey(nameof(UserId))]
         [InverseProperty("Notification")]
