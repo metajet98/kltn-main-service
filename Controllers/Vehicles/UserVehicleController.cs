@@ -79,7 +79,8 @@ namespace main_service.Controllers.Vehicles
         [Authorize(Roles = Role.Staff)]
         public JsonResult QueryAll([FromQuery] UserVehicleQuery query)
         {
-            var userVehicles = _userVehicleRepository.Get(x => x.PlateNumber.Equals(query.PlateNumber));
+            var userVehicles =
+                _userVehicleRepository.Get(x => x.PlateNumber.Equals(query.PlateNumber), includeProperties: "User");
             return ResponseHelper<IEnumerable<UserVehicle>>.OkResponse(userVehicles);
         }
 
