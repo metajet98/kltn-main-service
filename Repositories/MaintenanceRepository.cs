@@ -60,6 +60,19 @@ namespace main_service.Repositories
                 .FirstOrDefault(x => x.Id.Equals(maintenanceId));
             return result;
         }
+        
+        public Maintenance GetMaintenanceForPdf(int maintenanceId)
+        {
+            var result = DbSet
+                .Include(x => x.UserVehicle).ThenInclude(y => y.VehicleGroup)
+                .Include(x => x.UserVehicle).ThenInclude(y => y.User)
+                .Include("MaintenanceBillDetail.BranchServicePrice.MaintenanceService")
+                .Include(x => x.Branch)
+                .Include(x => x.SparepartCheckDetail).ThenInclude(y => y.Status)
+                .Include(x => x.SparepartCheckDetail).ThenInclude(y => y.SparePartItem)
+                .FirstOrDefault(x => x.Id.Equals(maintenanceId));
+            return result;
+        }
 
         public IEnumerable<Maintenance> Query(int? userVehicleId, int? staffId, int? branchId, DateTime? date)
         {

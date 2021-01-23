@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using main_service.Constants;
 using main_service.Databases;
 using main_service.Extensions;
@@ -21,19 +22,21 @@ namespace main_service.Controllers.Maintenances
         private readonly MaintenanceRepository _maintenanceRepository;
         private readonly UserRepository _userRepository;
         private readonly UserVehicleRepository _userVehicleRepository;
+        private readonly PdfService _pdfService;
 
         private readonly NotificationsRepository _notificationsRepository;
         private readonly FcmService _fcmService;
 
         public MaintenanceController(MaintenanceRepository maintenanceRepository, UserRepository userRepository,
             NotificationsRepository notificationsRepository, FcmService fcmService,
-            UserVehicleRepository userVehicleRepository)
+            UserVehicleRepository userVehicleRepository, PdfService pdfService)
         {
             _maintenanceRepository = maintenanceRepository;
             _userRepository = userRepository;
             _notificationsRepository = notificationsRepository;
             _fcmService = fcmService;
             _userVehicleRepository = userVehicleRepository;
+            _pdfService = pdfService;
         }
 
         [HttpGet]
@@ -119,6 +122,16 @@ namespace main_service.Controllers.Maintenances
         {
             var maintenance = _maintenanceRepository.GetMaintenance(maintenanceId);
             return ResponseHelper<Maintenance>.OkResponse(maintenance);
+        }
+        
+        [HttpGet]
+        [Route("{maintenanceId}/pdf")]
+        [Authorize(Roles = Role.All)]
+        public async Task<JsonResult> GetMaintenancePdf(int maintenanceId)
+        {
+            var maintenance = _maintenanceRepository.GetMaintenanceForPdf(maintenanceId);
+            var result = await _pdfService.MaintenancePdf(maintenance);
+            return ResponseHelper<string>.OkResponse(result);
         }
 
         [HttpPost]

@@ -1,0 +1,54 @@
+.header {
+    text-align: center;
+    color: black;
+    padding-bottom: 35px;
+}
+.intro {
+    text-align: left;
+    color: black;
+    padding-bottom: 35px;
+}
+.container {
+    padding: 16px;
+}
+.table-info {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+}
+.table-info td, th {
+    border: 1px solid gray;
+    padding: 15px;
+    font-size: 22px;
+}
+
+
+.table-bill th {
+    color: black;
+}
+
+.table-bill {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+}
+.table-bill td, th {
+    border: 1px solid gray;
+    padding: 15px;
+    font-size: 22px;
+    text-align: center;
+}
+.table-bill th {
+    color: black;
+}
+
+.sign-staff {
+    text-align:right;
+    font-size: 22px;
+}
+
+.sign-customer {
+    float:right;
+    margin-left: 300px;
+    font-size: 22px;
+}

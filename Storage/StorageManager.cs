@@ -36,6 +36,24 @@ namespace main_service.Storage
             await fileTransferUtility.UploadAsync(uploadRequest);
             return $"http://{BucketName}.s3.{RegionEndpoint.APSoutheast1.SystemName}.amazonaws.com/{guid}";
         }
+        
+        public async Task<string> UploadMemorySteamToAwsS3(MemoryStream memoryStream)
+        {
+            var guid = Guid.NewGuid().ToString();
+
+            var uploadRequest = new TransferUtilityUploadRequest
+            {
+                InputStream = memoryStream,
+                Key = guid,
+                BucketName = "maintenance-system-storage",
+                CannedACL = S3CannedACL.PublicRead,
+                ContentType = "application/pdf"
+            };
+
+            var fileTransferUtility = new TransferUtility(Client);
+            await fileTransferUtility.UploadAsync(uploadRequest);
+            return $"http://{BucketName}.s3.{RegionEndpoint.APSoutheast1.SystemName}.amazonaws.com/{guid}";
+        }
 
         public async Task RemoveFile(string key)
         {

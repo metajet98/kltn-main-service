@@ -1,4 +1,6 @@
 using System.Text;
+using DinkToPdf;
+using DinkToPdf.Contracts;
 using main_service.Databases;
 using main_service.Repositories;
 using main_service.RestApi.Converters;
@@ -40,6 +42,8 @@ namespace main_service
                     });
             });
             
+            services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+            
             services.AddControllers().AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
@@ -76,6 +80,7 @@ namespace main_service
             services.AddAuthorization();
             services.AddSingleton<IEncryptionHelper, EncryptionHelper>();
             services.AddSingleton<StorageManager>();
+            services.AddSingleton<PdfService>();
             
             services.AddScoped<UserRepository>();
             services.AddScoped<CompanyRepository>();
