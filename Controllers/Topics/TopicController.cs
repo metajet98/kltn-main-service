@@ -40,25 +40,25 @@ namespace main_service.Controllers.Topics
         
         [HttpGet]
         [Route("/api/topic")]
-        [Authorize(Roles = Constants.Role.SystemUser)]
+        [Authorize(Roles = Constants.Role.All)]
         public JsonResult GetAll([FromQuery] TopicQuery query)
         {
-            var topics = _topicRepository.QueryTopic(query);
+            var topics = _topicRepository.QueryTopics(query);
             return ResponseHelper<IEnumerable<Topic>>.OkResponse(topics);
         }
 
         [HttpGet]
         [Route("/api/topic/{id}")]
-        [Authorize(Roles = Constants.Role.SystemUser)]
+        [Authorize(Roles = Constants.Role.All)]
         public JsonResult Get(int id)
         {
-            var topic = _topicRepository.Get(x => x.Id.Equals(id), includeProperties: "TopicImage,TopicReply,User").FirstOrDefault();
+            var topic = _topicRepository.GetTopic(id);
             return ResponseHelper<Topic>.OkResponse(topic);
         }
 
         [HttpPost]
         [Route("/api/topic/{id}/reply")]
-        [Authorize(Roles = Constants.Role.SystemUser)]
+        [Authorize(Roles = Constants.Role.All)]
         public JsonResult PostReply(int id, [FromBody] TopicReplyRequest topicReplyRequest)
         {
             var userId = User.Identity.GetId();
@@ -76,8 +76,8 @@ namespace main_service.Controllers.Topics
                 _notificationsRepository.Insert(new Notification
                 {
                     UserId = userId,
-                    Description = "Vừa có người trả lời topic của bạn",
-                    Title = "Topic của bạn vừa có một lượt trả lời, xem ngay tại trang hỏi đáp",
+                    Description = "Topic của bạn vừa có một lượt trả lời, xem ngay tại trang hỏi đáp",
+                    Title = "Vừa có người trả lời topic của bạn",
                     Activity = "topic_reply",
                     CreatedDate = DateTime.Now,
                 });

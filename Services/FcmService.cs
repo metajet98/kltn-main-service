@@ -19,10 +19,17 @@ namespace main_service.Services
                 GoogleCredential.FromFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, 
                     "flutterfcm-78458-firebase-adminsdk-qpifp-9c3aa79fb7.json"));
             if (FirebaseApp.DefaultInstance != null) return;
-            var app = FirebaseApp.Create(new AppOptions
+            try
             {
-                Credential = credentialFile
-            });
+                var app = FirebaseApp.Create(new AppOptions
+                {
+                    Credential = credentialFile
+                });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         public async void SendMessages(List<int> userIds, Dictionary<string, string> data)

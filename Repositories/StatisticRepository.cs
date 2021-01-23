@@ -28,6 +28,11 @@ namespace main_service.Repositories
             var maintenanceStaffCount = await _context.User.CountAsync(x => x.Role == Constants.Role.StaffMaintenance);
             var deskStaffCount = await _context.User.CountAsync(x => x.Role == Constants.Role.StaffDesk);
             var topicCount = await _context.Topic.CountAsync();
+            
+            var branchCount = await _context.Branch.CountAsync();
+            var userVehicleCount = await _context.UserVehicle.CountAsync();
+            var maintenanceCount = await _context.Maintenance.CountAsync();
+            var avgReview = await _context.Review.AverageAsync(x => x.Star);
 
             return new
             {
@@ -36,7 +41,11 @@ namespace main_service.Repositories
                 userCount = userCount,
                 maintenanceStaffCount = maintenanceStaffCount,
                 deskStaffCount = deskStaffCount,
-                topicCount = topicCount
+                topicCount = topicCount,
+                branchCount = branchCount,
+                userVehicleCount = userVehicleCount,
+                maintenanceCount = maintenanceCount,
+                avgReview = avgReview
             };
         }
 
