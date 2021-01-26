@@ -24,34 +24,61 @@ namespace main_service.Controllers.Branches
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult Create([FromBody] BranchRequest branchRequest)
         {
-            var newBranch = new Branch
+            try
             {
-                Address = branchRequest.Address,
-                Latitude = branchRequest.Latitude,
-                Longitude = branchRequest.Longitude,
-                Name = branchRequest.Name,
-                CreatedDate = DateTime.Now,
-                Logo = branchRequest.Logo
-            };
+                var newBranch = new Branch
+                {
+                    Address = branchRequest.Address,
+                    Latitude = branchRequest.Latitude,
+                    Longitude = branchRequest.Longitude,
+                    Name = branchRequest.Name,
+                    CreatedDate = DateTime.Now,
+                    Logo = branchRequest.Logo
+                };
             
-            _branchRepository.Insert(newBranch);
-            _branchRepository.Save();
-            return ResponseHelper<string>.OkResponse(null, "Thêm chi nhánh thành công");
+                _branchRepository.Insert(newBranch);
+                _branchRepository.Save();
+                return ResponseHelper<string>.OkResponse(null, "Thêm chi nhánh thành công");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
 
         [HttpGet]
         public JsonResult GetAll()
         {
-            var branches = _branchRepository.Get();
-            return ResponseHelper<IEnumerable<Branch>>.OkResponse(branches);
+            try
+            {
+                var branches = _branchRepository.Get();
+                return ResponseHelper<IEnumerable<Branch>>.OkResponse(branches);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
         
         [HttpGet]
         [Route("{branchId}")]
         public JsonResult Get(int branchId)
         {
-            var branch = _branchRepository.GetById(branchId);
-            return ResponseHelper<Branch>.OkResponse(branch);
+            try
+            {
+                var branch = _branchRepository.GetById(branchId);
+                return ResponseHelper<Branch>.OkResponse(branch);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
 
         [HttpDelete]

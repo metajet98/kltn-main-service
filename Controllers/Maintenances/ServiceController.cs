@@ -38,17 +38,26 @@ namespace main_service.Controllers.Maintenances
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult CreateServices([FromBody] MaintenanceServiceRequest request)
         {
-            var newMaintenanceService = new MaintenanceService
+            try
             {
-                Name = request.Name,
-                Description = request.Description,
-                VehicleGroupId = request.VehicleGroupId,
-                WarrantyOdo = request.WarrantyOdo,
-                WarrantyPeriod = request.WarrantyPeriod
-            };
-            _maintenanceServiceRepository.Insert(newMaintenanceService);
-            _maintenanceServiceRepository.Save();
-            return ResponseHelper<string>.OkResponse(null, "Thêm thành công");
+                var newMaintenanceService = new MaintenanceService
+                {
+                    Name = request.Name,
+                    Description = request.Description,
+                    VehicleGroupId = request.VehicleGroupId,
+                    WarrantyOdo = request.WarrantyOdo,
+                    WarrantyPeriod = request.WarrantyPeriod
+                };
+                _maintenanceServiceRepository.Insert(newMaintenanceService);
+                _maintenanceServiceRepository.Save();
+                return ResponseHelper<string>.OkResponse(null, "Thêm thành công");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
         
         [HttpDelete]
@@ -73,17 +82,26 @@ namespace main_service.Controllers.Maintenances
         [Authorize(Roles = Role.Staff)]
         public JsonResult GetBranchServices(int branchId, [FromQuery] int vehicleGroupId)
         {
-            var branchServices = _branchServicePriceRepository.GetAllPriceByVehicleGroupId(vehicleGroupId, branchId);
-            var result = branchServices.Select(x => new
+            try
             {
-                Id = x.Id,
-                Name = x.MaintenanceService.Name,
-                Description = x.MaintenanceService.Description,
-                LaborCost = x.LaborCost,
-                SparePartPrice = x.SparePartPrice,
-                ServiceId = x.MaintenanceService.Id
-            }).ToList();
-            return ResponseHelper<IEnumerable<object>>.OkResponse(result);
+                var branchServices = _branchServicePriceRepository.GetAllPriceByVehicleGroupId(vehicleGroupId, branchId);
+                var result = branchServices.Select(x => new
+                {
+                    Id = x.Id,
+                    Name = x.MaintenanceService.Name,
+                    Description = x.MaintenanceService.Description,
+                    LaborCost = x.LaborCost,
+                    SparePartPrice = x.SparePartPrice,
+                    ServiceId = x.MaintenanceService.Id
+                }).ToList();
+                return ResponseHelper<IEnumerable<object>>.OkResponse(result);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
         
         [HttpPost]
@@ -91,9 +109,18 @@ namespace main_service.Controllers.Maintenances
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult CreateOrUpdateBranchPrice([FromBody] BranchServicePriceRequest request, int branchId)
         {
-            _branchServicePriceRepository.CreateOrUpdatePrice(request.MaintenanceServiceId, request.LaborCost, request.SparePartPrice, branchId);
-            _branchServicePriceRepository.Save();
-            return ResponseHelper<string>.OkResponse(null, "Thêm/Sửa thành công!");
+            try
+            {
+                _branchServicePriceRepository.CreateOrUpdatePrice(request.MaintenanceServiceId, request.LaborCost, request.SparePartPrice, branchId);
+                _branchServicePriceRepository.Save();
+                return ResponseHelper<string>.OkResponse(null, "Thêm/Sửa thành công!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
         
         [HttpDelete]

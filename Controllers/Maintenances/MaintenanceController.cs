@@ -52,57 +52,66 @@ namespace main_service.Controllers.Maintenances
         [Authorize(Roles = Role.StaffMaintenance)]
         public JsonResult CreateMaintenance([FromBody] MaintenanceRequest request)
         {
-            var staff = _userRepository
-                .Get(x => x.Id.Equals(User.Identity.GetId()), includeProperties: "Branch").FirstOrDefault();
-            if (staff?.BranchId != null)
+            try
             {
-                var newMaintenance = new Maintenance
+                var staff = _userRepository
+                    .Get(x => x.Id.Equals(User.Identity.GetId()), includeProperties: "Branch").FirstOrDefault();
+                if (staff?.BranchId != null)
                 {
-                    BranchId = staff.BranchId,
-                    Notes = request.Notes,
-                    Odometer = request.Odometer,
-                    CreatedDate = DateTime.Now,
-                    ReceptionStaffId = staff.Id,
-                    UserVehicleId = request.UserVehicleId,
-                    Status = 0,
-                    MotorWash = request.MotorWash,
-                    SparepartBack = request.SparepartBack,
-                    Title = request.Title,
-                };
-                _maintenanceRepository.Insert(newMaintenance);
-                _maintenanceRepository.Save();
-
-                if (request.Images != null)
-                {
-                    _maintenanceRepository.InsertMaintenanceImages(newMaintenance.Id, request.Images);
-                }
-                
-                var userId = _userVehicleRepository.GetById(request.UserVehicleId)?.UserId;
-
-                if (userId != null)
-                {
-                    var data = FcmData.CreateFcmData("new_maintenance", null);
-                    var notify = FcmData.CreateFcmNotification(
-                        "Bạn vừa được tạo một lượt bảo dưỡng", 
-                        "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe",
-                        null);
-                    _fcmService.SendMessage(userId.Value, data, notify);
-                    _notificationsRepository.Insert(new Notification
+                    var newMaintenance = new Maintenance
                     {
-                        UserId = userId,
-                        Description = "Bạn vừa được tạo một lượt bảo dưỡng",
-                        Title = "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe",
-                        Activity = "new_maintenance",
+                        BranchId = staff.BranchId,
+                        Notes = request.Notes,
+                        Odometer = request.Odometer,
                         CreatedDate = DateTime.Now,
-                    });
-                    _notificationsRepository.Save();
-                }
+                        ReceptionStaffId = staff.Id,
+                        UserVehicleId = request.UserVehicleId,
+                        Status = 0,
+                        MotorWash = request.MotorWash,
+                        SparepartBack = request.SparepartBack,
+                        Title = request.Title,
+                    };
+                    _maintenanceRepository.Insert(newMaintenance);
+                    _maintenanceRepository.Save();
 
-                return ResponseHelper<Maintenance>.OkResponse(newMaintenance, "Tạo lượt bảo dưỡng thành công");
+                    if (request.Images != null)
+                    {
+                        _maintenanceRepository.InsertMaintenanceImages(newMaintenance.Id, request.Images);
+                    }
+
+                    var userId = _userVehicleRepository.GetById(request.UserVehicleId)?.UserId;
+
+                    if (userId != null)
+                    {
+                        var data = FcmData.CreateFcmData("new_maintenance", null);
+                        var notify = FcmData.CreateFcmNotification(
+                            "Bạn vừa được tạo một lượt bảo dưỡng",
+                            "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe",
+                            null);
+                        _fcmService.SendMessage(userId.Value, data, notify);
+                        _notificationsRepository.Insert(new Notification
+                        {
+                            UserId = userId,
+                            Description = "Bạn vừa được tạo một lượt bảo dưỡng",
+                            Title = "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe",
+                            Activity = "new_maintenance",
+                            CreatedDate = DateTime.Now,
+                        });
+                        _notificationsRepository.Save();
+                    }
+
+                    return ResponseHelper<Maintenance>.OkResponse(newMaintenance, "Tạo lượt bảo dưỡng thành công");
+                }
+                else
+                {
+                    return ResponseHelper<object>.ErrorResponse(null, "Bạn hiện tại không ở chi nhánh nào cả!");
+                }
             }
-            else
+            catch (Exception e)
             {
-                return ResponseHelper<object>.ErrorResponse(null, "Bạn hiện tại không ở chi nhánh nào cả!");
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
             }
         }
 
@@ -123,15 +132,24 @@ namespace main_service.Controllers.Maintenances
             var maintenance = _maintenanceRepository.GetMaintenance(maintenanceId);
             return ResponseHelper<Maintenance>.OkResponse(maintenance);
         }
-        
+
         [HttpGet]
         [Route("{maintenanceId}/pdf")]
         [Authorize(Roles = Role.All)]
         public async Task<JsonResult> GetMaintenancePdf(int maintenanceId)
         {
-            var maintenance = _maintenanceRepository.GetMaintenanceForPdf(maintenanceId);
-            var result = await _pdfService.MaintenancePdf(maintenance);
-            return ResponseHelper<string>.OkResponse(result);
+            try
+            {
+                var maintenance = _maintenanceRepository.GetMaintenanceForPdf(maintenanceId);
+                var result = await _pdfService.MaintenancePdf(maintenance);
+                return ResponseHelper<string>.OkResponse(result);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
 
         [HttpPost]
@@ -139,11 +157,20 @@ namespace main_service.Controllers.Maintenances
         [Authorize(Roles = Role.StaffMaintenance)]
         public JsonResult UpdateMaintenanceCheck(int maintenanceId, [FromBody] SparePartMaintenanceCheckRequest request)
         {
-            var result =
-                _maintenanceRepository.InsertMaintenanceChecks(maintenanceId, request.SparePartMaintenanceChecks);
-            return result
-                ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
-                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            try
+            {
+                var result =
+                    _maintenanceRepository.InsertMaintenanceChecks(maintenanceId, request.SparePartMaintenanceChecks);
+                return result
+                    ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
+                    : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
 
         [HttpPost]
@@ -151,22 +178,40 @@ namespace main_service.Controllers.Maintenances
         [Authorize(Roles = Role.Staff)]
         public JsonResult UpdateMaintenanceBill(int maintenanceId, [FromBody] MaintenanceBillRequest request)
         {
-            var result =
-                _maintenanceRepository.InsertMaintenanceBill(request, maintenanceId);
-            return result
-                ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
-                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            try
+            {
+                var result =
+                    _maintenanceRepository.InsertMaintenanceBill(request, maintenanceId);
+                return result
+                    ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
+                    : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
 
         [HttpPost]
         [Route("{maintenanceId}/images")]
         public JsonResult AddMaintenanceImage(int maintenanceId, [FromBody] ImageRequest image)
         {
-            var result =
-                _maintenanceRepository.AddMaintenanceImage(maintenanceId, image.ImageUrl);
-            return result
-                ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
-                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            try
+            {
+                var result =
+                    _maintenanceRepository.AddMaintenanceImage(maintenanceId, image.ImageUrl);
+                return result
+                    ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
+                    : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
 
         [HttpPost]
@@ -174,22 +219,32 @@ namespace main_service.Controllers.Maintenances
         [Authorize(Roles = Role.StaffMaintenance)]
         public JsonResult StartMaintenance(int maintenanceId)
         {
-            var maintainerId = User.Identity.GetId();
-            var maintainer = _userRepository.GetById(maintainerId);
-            if (maintainer == null || maintainer.Role != Role.StaffMaintenance)
+            try
             {
-                return ResponseHelper<dynamic>.ErrorResponse(null, "Chỉ có nhân viên bảo dưỡng mới tiến hành được!");
-            }
+                var maintainerId = User.Identity.GetId();
+                var maintainer = _userRepository.GetById(maintainerId);
+                if (maintainer == null || maintainer.Role != Role.StaffMaintenance)
+                {
+                    return ResponseHelper<dynamic>.ErrorResponse(null,
+                        "Chỉ có nhân viên bảo dưỡng mới tiến hành được!");
+                }
 
-            var result = _maintenanceRepository.UpdateMaintainer(maintenanceId, maintainerId);
-            if (result)
-            {
-                var maintenance = _maintenanceRepository.GetById(maintenanceId);
-                return ResponseHelper<dynamic>.OkResponse(maintenance);
+                var result = _maintenanceRepository.UpdateMaintainer(maintenanceId, maintainerId);
+                if (result)
+                {
+                    var maintenance = _maintenanceRepository.GetById(maintenanceId);
+                    return ResponseHelper<dynamic>.OkResponse(maintenance);
+                }
+                else
+                {
+                    return ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+                }
             }
-            else
+            catch (Exception e)
             {
-                return ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
             }
         }
 
@@ -198,27 +253,28 @@ namespace main_service.Controllers.Maintenances
         [Authorize(Roles = Role.StaffMaintenance)]
         public JsonResult FinishMaintenance(int maintenanceId)
         {
-            var maintainerId = User.Identity.GetId();
-            var maintainer = _userRepository.GetById(maintainerId);
-            if (maintainer == null || maintainer.Role != Role.StaffMaintenance)
+            try
             {
-                return ResponseHelper<dynamic>.ErrorResponse(null, "Chỉ có nhân viên bảo dưỡng mới tiến hành được!");
-            }
-
-            var result = _maintenanceRepository.FinishMaintenance(maintenanceId);
-
-            var maintenance = _maintenanceRepository.GetMaintenance(maintenanceId);
-            var userId = maintenance.UserVehicle.UserId;
-            if (userId != null)
-            {
-                var data = FcmData.CreateFcmData("finish_maintenance", null);
-                var notify = FcmData.CreateFcmNotification(
-                    "Lượt bảo dưỡng vừa kết thúc", 
-                    "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe",
-                    null);
-                _fcmService.SendMessage(userId.Value, data, notify);
-                try
+                var maintainerId = User.Identity.GetId();
+                var maintainer = _userRepository.GetById(maintainerId);
+                if (maintainer == null || maintainer.Role != Role.StaffMaintenance)
                 {
+                    return ResponseHelper<dynamic>.ErrorResponse(null,
+                        "Chỉ có nhân viên bảo dưỡng mới tiến hành được!");
+                }
+
+                var result = _maintenanceRepository.FinishMaintenance(maintenanceId);
+
+                var maintenance = _maintenanceRepository.GetMaintenance(maintenanceId);
+                var userId = maintenance.UserVehicle.UserId;
+                if (userId != null)
+                {
+                    var data = FcmData.CreateFcmData("finish_maintenance", null);
+                    var notify = FcmData.CreateFcmNotification(
+                        "Lượt bảo dưỡng vừa kết thúc",
+                        "Bạn có thể xem chi tiết bảo dưỡng tại màn hình xe",
+                        null);
+                    _fcmService.SendMessage(userId.Value, data, notify);
                     var newNotification = new Notification
                     {
                         UserId = userId.Value,
@@ -230,16 +286,17 @@ namespace main_service.Controllers.Maintenances
                     _notificationsRepository.Insert(newNotification);
                     _notificationsRepository.Save();
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                    return ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
-                }
-            }
 
-            return result
-                ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
-                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+                return result
+                    ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
+                    : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
 
         [HttpDelete]
@@ -247,11 +304,20 @@ namespace main_service.Controllers.Maintenances
         [Authorize(Roles = Role.Staff)]
         public JsonResult RemoveMaintenanceImage(int maintenanceId, int imageId)
         {
-            var result =
-                _maintenanceRepository.DeleteMaintenanceImage(imageId);
-            return result
-                ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
-                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            try
+            {
+                var result =
+                    _maintenanceRepository.DeleteMaintenanceImage(imageId);
+                return result
+                    ? ResponseHelper<dynamic>.OkResponse(null, "Cập nhật thành công")
+                    : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
 
         [HttpPost]
@@ -259,11 +325,20 @@ namespace main_service.Controllers.Maintenances
         [Authorize(Roles = Role.Staff)]
         public JsonResult AddMaintenanceSchedule(int maintenanceId, [FromBody] MaintenanceScheduleRequest request)
         {
-            var result =
-                _maintenanceRepository.InsertSchedule(maintenanceId, request);
-            return result
-                ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
-                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            try
+            {
+                var result =
+                    _maintenanceRepository.InsertSchedule(maintenanceId, request);
+                return result
+                    ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
+                    : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
 
         [HttpPost]
@@ -271,12 +346,21 @@ namespace main_service.Controllers.Maintenances
         [Authorize(Roles = Role.User)]
         public JsonResult AddReview(int maintenanceId, [FromBody] ReviewRequest request)
         {
-            var userId = User.Identity.GetId();
-            var result =
-                _maintenanceRepository.InsertReview(maintenanceId, request, userId);
-            return result
-                ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
-                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            try
+            {
+                var userId = User.Identity.GetId();
+                var result =
+                    _maintenanceRepository.InsertReview(maintenanceId, request, userId);
+                return result
+                    ? ResponseHelper<List<SparepartCheckDetail>>.OkResponse(null, "Cập nhật thành công")
+                    : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
     }
 }

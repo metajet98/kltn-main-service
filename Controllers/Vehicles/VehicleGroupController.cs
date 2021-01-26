@@ -30,16 +30,25 @@ namespace main_service.Controllers.Vehicles
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult Create([FromBody] VehicleGroupRequest groupRequest)
         {
-            _vehicleGroupRepository.Insert(new VehicleGroup
+            try
             {
-                Capacity = groupRequest.Capacity,
-                Name = groupRequest.Name,
-                VehicleCompanyId = groupRequest.VehicleCompanyId,
-                VehicleTypeId = groupRequest.VehicleTypeId,
-                Image = groupRequest.Image
-            });
-            _vehicleGroupRepository.Save();
-            return ResponseHelper<string>.OkResponse(null, "Thêm thành công");
+                _vehicleGroupRepository.Insert(new VehicleGroup
+                {
+                    Capacity = groupRequest.Capacity,
+                    Name = groupRequest.Name,
+                    VehicleCompanyId = groupRequest.VehicleCompanyId,
+                    VehicleTypeId = groupRequest.VehicleTypeId,
+                    Image = groupRequest.Image
+                });
+                _vehicleGroupRepository.Save();
+                return ResponseHelper<string>.OkResponse(null, "Thêm thành công");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
         
         [HttpDelete]

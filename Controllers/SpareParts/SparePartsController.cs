@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using main_service.Constants;
 using main_service.Databases;
@@ -37,16 +38,25 @@ namespace main_service.Controllers.SpareParts
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult CreateStatus([FromBody] SparePartCheckingStatusRequest request)
         {
-            var newStatus = new SparepartStatus
+            try
             {
-                Acronym = request.Acronym,
-                Name = request.Name
-            };
-            _sparePartCheckingStatusRepository.Insert(newStatus);
-            _sparePartCheckingStatusRepository.Save();
-            return ResponseHelper<IEnumerable<SparepartStatus>>.OkResponse(null, "Tạo trạng thái thành công!Ò");
+                var newStatus = new SparepartStatus
+                {
+                    Acronym = request.Acronym,
+                    Name = request.Name
+                };
+                _sparePartCheckingStatusRepository.Insert(newStatus);
+                _sparePartCheckingStatusRepository.Save();
+                return ResponseHelper<IEnumerable<SparepartStatus>>.OkResponse(null, "Tạo trạng thái thành công!Ò");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
-        
+
         [HttpGet]
         [Route("vehicle-group/{vehicleGroupId}/spare-part")]
         [Authorize(Roles = Role.Staff)]
@@ -55,36 +65,55 @@ namespace main_service.Controllers.SpareParts
             var vehicleSparePart = _sparePartRepository.GetByVehicleGroupId(vehicleGroupId);
             return ResponseHelper<IEnumerable<VehicleGroupSparepartItem>>.OkResponse(vehicleSparePart);
         }
-        
+
         [HttpPost]
         [Route("vehicle-group/{vehicleGroupId}/spare-part")]
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult CreateVehicleSparePart([FromBody] SparePartRequest request, int vehicleGroupId)
         {
-            var newSparePart = new VehicleGroupSparepartItem
-            {    
-                Description = request.Description,
-                Name = request.Name,
-                VehicleGroupId = vehicleGroupId
-            };
-            _sparePartRepository.Insert(newSparePart);
-            _sparePartRepository.Save();
-            return ResponseHelper<string>.OkResponse(null, "Thêm thành công!");
+            try
+            {
+                var newSparePart = new VehicleGroupSparepartItem
+                {
+                    Description = request.Description,
+                    Name = request.Name,
+                    VehicleGroupId = vehicleGroupId
+                };
+                _sparePartRepository.Insert(newSparePart);
+                _sparePartRepository.Save();
+                return ResponseHelper<string>.OkResponse(null, "Thêm thành công!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
-        
+
         [HttpDelete]
         [Route("spare-part/{id}")]
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult DeleteVehicleSparePart(int id)
         {
-            var vehicleSparePart = _sparePartRepository.GetById(id);
-            if (vehicleSparePart == null)
+            try
             {
-                return ResponseHelper<string>.ErrorResponse(null, "Không tìm thấy!");
+                var vehicleSparePart = _sparePartRepository.GetById(id);
+                if (vehicleSparePart == null)
+                {
+                    return ResponseHelper<string>.ErrorResponse(null, "Không tìm thấy!");
+                }
+
+                _sparePartRepository.Delete(vehicleSparePart);
+                _sparePartRepository.Save();
+                return ResponseHelper<string>.OkResponse(null, "Xóa thành công!");
             }
-            _sparePartRepository.Delete(vehicleSparePart);
-            _sparePartRepository.Save();
-            return ResponseHelper<string>.OkResponse(null, "Xóa thành công!");
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
     }
 }

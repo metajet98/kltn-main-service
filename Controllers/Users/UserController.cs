@@ -29,23 +29,32 @@ namespace main_service.Controllers.Users
         [HttpPost]
         public JsonResult Create([FromBody] UserRequest userRequest)
         {
-            var newUser = new User
+            try
             {
-                Address = userRequest.Address,
-                Birthday = userRequest.Birthday, 
-                Email = userRequest.Email,
-                FullName = userRequest.FullName,
-                PhoneNumber = userRequest.PhoneNumber,
-                Role = Role.User,
-                CreatedDate = DateTime.Now
-            };
-            _userRepository.Insert(newUser);
-            _userRepository.Save();
-            var newUserAuth = _encryptionHelper.HashPassword(userRequest.Password, newUser.Id);
-            _userAuthRepository.Insert(newUserAuth);
-            _userAuthRepository.Save();
+                var newUser = new User
+                {
+                    Address = userRequest.Address,
+                    Birthday = userRequest.Birthday, 
+                    Email = userRequest.Email,
+                    FullName = userRequest.FullName,
+                    PhoneNumber = userRequest.PhoneNumber,
+                    Role = Role.User,
+                    CreatedDate = DateTime.Now
+                };
+                _userRepository.Insert(newUser);
+                _userRepository.Save();
+                var newUserAuth = _encryptionHelper.HashPassword(userRequest.Password, newUser.Id);
+                _userAuthRepository.Insert(newUserAuth);
+                _userAuthRepository.Save();
             
-            return ResponseHelper<string>.OkResponse(null, "Tạo tài khoản thành công!");
+                return ResponseHelper<string>.OkResponse(null, "Tạo tài khoản thành công!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
 
         [HttpGet]

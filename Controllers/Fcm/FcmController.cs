@@ -1,3 +1,4 @@
+using System;
 using main_service.Constants;
 using main_service.Extensions;
 using main_service.Helpers;
@@ -24,8 +25,17 @@ namespace main_service.Controllers.Fcm
         [Authorize(Roles = Role.SystemUser)]
         public JsonResult Register([FromBody] FcmTokenRequest data)
         {
-            var userId = User.Identity.GetId();
-            return _fcmTokenRepository.InsertToken(data.Token, userId) ? ResponseHelper<dynamic>.OkResponse(null) : ResponseHelper<dynamic>.ErrorResponse(null);
+            try
+            {
+                var userId = User.Identity.GetId();
+                return _fcmTokenRepository.InsertToken(data.Token, userId) ? ResponseHelper<dynamic>.OkResponse(null) : ResponseHelper<dynamic>.ErrorResponse(null);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra khi đăng kí token FCM!");
+            }
         }
 
         [HttpPost]
@@ -33,9 +43,18 @@ namespace main_service.Controllers.Fcm
         [Authorize(Roles = Role.SystemUser)]
         public JsonResult Unregister([FromBody] FcmTokenRequest data)
         {
-            var userId = User.Identity.GetId();
-            _fcmTokenRepository.RemoveToken(data.Token, userId);
-            return ResponseHelper<dynamic>.OkResponse(null);
+            try
+            {
+                var userId = User.Identity.GetId();
+                _fcmTokenRepository.RemoveToken(data.Token, userId);
+                return ResponseHelper<dynamic>.OkResponse(null);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra khi huỷ token FCM!");
+            }
         }
     }
 }

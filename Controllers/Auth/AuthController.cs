@@ -23,43 +23,65 @@ namespace main_service.Controllers.Auth
         [Route("/api/login")]
         public JsonResult Login([FromBody] UserRequest authRequest)
         {
-            var user = _userRepository.FindByPhoneNumber(authRequest.PhoneNumber);
-            if (user == null)
+            try
             {
-                return ResponseHelper<string>.ErrorResponse(null,  "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
-            }
+                var user = _userRepository.FindByPhoneNumber(authRequest.PhoneNumber);
+                if (user == null)
+                {
+                    return ResponseHelper<string>.ErrorResponse(null,
+                        "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
+                }
 
-            var isPasswordCorrect = _encryptionHelper.ValidatePassword(authRequest.Password, user.UserAuth.Hash, user.UserAuth.Salt);
-            if (isPasswordCorrect)
+                var isPasswordCorrect =
+                    _encryptionHelper.ValidatePassword(authRequest.Password, user.UserAuth.Hash, user.UserAuth.Salt);
+                if (isPasswordCorrect)
+                {
+                    return new JsonResult(_encryptionHelper.GenerateToken(user.Id, user.Role));
+                }
+
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
+            }
+            catch (Exception e)
             {
-                return new JsonResult(_encryptionHelper.GenerateToken(user.Id, user.Role));
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
             }
-
-            return ResponseHelper<string>.ErrorResponse(null, "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
+            
         }
         
         [HttpPost]
         [Route("/api/login/staff_maintenance")]
         public JsonResult StaffLogin([FromBody] UserRequest authRequest)
         {
-            var user = _userRepository.FindByPhoneNumber(authRequest.PhoneNumber);
-            if (user == null)
+            try
             {
-                return ResponseHelper<string>.ErrorResponse(null,  "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
-            }
+                var user = _userRepository.FindByPhoneNumber(authRequest.PhoneNumber);
+                if (user == null)
+                {
+                    return ResponseHelper<string>.ErrorResponse(null,  "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
+                }
             
-            if (user.Role != Constants.Role.StaffMaintenance)
-            {
-                return ResponseHelper<string>.ErrorResponse(null,  "Tài khoản không phải là nhân viên bảo dưỡng");
-            }
+                if (user.Role != Constants.Role.StaffMaintenance)
+                {
+                    return ResponseHelper<string>.ErrorResponse(null,  "Tài khoản không phải là nhân viên bảo dưỡng");
+                }
 
-            var isPasswordCorrect = _encryptionHelper.ValidatePassword(authRequest.Password, user.UserAuth.Hash, user.UserAuth.Salt);
-            if (isPasswordCorrect)
-            {
-                return new JsonResult(_encryptionHelper.GenerateToken(user.Id, user.Role));
-            }
+                var isPasswordCorrect = _encryptionHelper.ValidatePassword(authRequest.Password, user.UserAuth.Hash, user.UserAuth.Salt);
+                if (isPasswordCorrect)
+                {
+                    return new JsonResult(_encryptionHelper.GenerateToken(user.Id, user.Role));
+                }
 
-            return ResponseHelper<string>.ErrorResponse(null, "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
+                return ResponseHelper<string>.ErrorResponse(null, "Số điện thoại hoặc mật khẩu không đúng, vui lòng thử lại!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
         
         [HttpPost]
@@ -86,9 +108,11 @@ namespace main_service.Controllers.Auth
 
                 return new JsonResult(_encryptionHelper.GenerateToken(user.Id, user.Role));
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                return ResponseHelper<string>.UnauthorizedResponse(null, "Refresh Token không hợp lệ hoặc đã hết hạn");
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
             }
             
         }

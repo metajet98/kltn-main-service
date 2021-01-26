@@ -34,24 +34,33 @@ namespace main_service.Controllers.Staffs
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult CreateStaff([FromBody] UserRequest userRequest)
         {
-            var newUser = new User
+            try
             {
-                Address = userRequest.Address,
-                Birthday = userRequest.Birthday,
-                Email = userRequest.Email,
-                FullName = userRequest.FullName,
-                PhoneNumber = userRequest.PhoneNumber,
-                Role = userRequest.Role,
-                CreatedDate = DateTime.Now,
-                BranchId = userRequest.BranchId
-            };
-            _userRepository.Insert(newUser);
-            _userRepository.Save();
-            var newUserAuth = _encryptionHelper.HashPassword(userRequest.Password, newUser.Id);
-            _userAuthRepository.Insert(newUserAuth);
-            _userAuthRepository.Save();
+                var newUser = new User
+                {
+                    Address = userRequest.Address,
+                    Birthday = userRequest.Birthday,
+                    Email = userRequest.Email,
+                    FullName = userRequest.FullName,
+                    PhoneNumber = userRequest.PhoneNumber,
+                    Role = userRequest.Role,
+                    CreatedDate = DateTime.Now,
+                    BranchId = userRequest.BranchId
+                };
+                _userRepository.Insert(newUser);
+                _userRepository.Save();
+                var newUserAuth = _encryptionHelper.HashPassword(userRequest.Password, newUser.Id);
+                _userAuthRepository.Insert(newUserAuth);
+                _userAuthRepository.Save();
 
-            return ResponseHelper<string>.OkResponse(null, "Tạo tài khoản thành công!");
+                return ResponseHelper<string>.OkResponse(null, "Tạo tài khoản thành công!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
 
         [HttpGet]
@@ -69,15 +78,24 @@ namespace main_service.Controllers.Staffs
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult ModifyStaff(int staffId, [FromBody] BranchStaffRequest request)
         {
-            var branch = _branchRepository.GetById(request.BranchId);
-            if (branch == null) return ResponseHelper<string>.ErrorResponse(null, "Chi nhánh không tồn tại!");
-            var staff = _userRepository.Get(x => x.Id.Equals(staffId)).FirstOrDefault();
-            if (staff == null) return ResponseHelper<string>.ErrorResponse(null, "Nhân viên!");
+            try
+            {
+                var branch = _branchRepository.GetById(request.BranchId);
+                if (branch == null) return ResponseHelper<string>.ErrorResponse(null, "Chi nhánh không tồn tại!");
+                var staff = _userRepository.Get(x => x.Id.Equals(staffId)).FirstOrDefault();
+                if (staff == null) return ResponseHelper<string>.ErrorResponse(null, "Nhân viên!");
 
-            staff.BranchId = request.BranchId;
-            _userRepository.Update(staff);
-            _userRepository.Save();
-            return ResponseHelper<string>.OkResponse(null, "Thanh đổi chi nhánh cho nhân viên thành công!");
+                staff.BranchId = request.BranchId;
+                _userRepository.Update(staff);
+                _userRepository.Save();
+                return ResponseHelper<string>.OkResponse(null, "Thanh đổi chi nhánh cho nhân viên thành công!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
     }
 }

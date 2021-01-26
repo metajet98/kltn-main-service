@@ -35,34 +35,43 @@ namespace main_service.Controllers.Vehicles
         [HttpPost]
         public JsonResult Create([FromBody] UserVehicleRequest userVehicleRequest)
         {
-            var userId = userVehicleRequest.UserId ?? User.Identity.GetId();
-            if (_userRepository.GetById(userId) == null)
+            try
             {
-                return ResponseHelper<string>.ErrorResponse("userId", "Người dùng không tồn tại");
+                var userId = userVehicleRequest.UserId ?? User.Identity.GetId();
+                if (_userRepository.GetById(userId) == null)
+                {
+                    return ResponseHelper<string>.ErrorResponse("userId", "Người dùng không tồn tại");
+                }
+
+                if (_vehicleGroupRepository.GetById(userVehicleRequest.VehicleGroupId) == null)
+                {
+                    return ResponseHelper<string>.ErrorResponse("vehicleGroupId", "Không tìm thấy loại xe");
+                }
+
+                var newUserVehicle = new UserVehicle
+                {
+                    Color = userVehicleRequest.Color,
+                    UserId = userId,
+                    VehicleGroupId = userVehicleRequest.VehicleGroupId,
+                    EngineNumber = userVehicleRequest.EngineNumber,
+                    PlateNumber = userVehicleRequest.PlateNumber,
+                    ChassisNumber = userVehicleRequest.ChassisNumber,
+                    Name = userVehicleRequest.Name,
+                };
+
+                _userVehicleRepository.Insert(newUserVehicle);
+                _userVehicleRepository.Save();
+                _fcmService.SendMessages(
+                    new List<int> {userId},
+                    FcmData.CreateFcmData("create_bike_success", new Dictionary<string, string> {{"status", "done"}}));
+                return ResponseHelper<string>.OkResponse(null, "Thêm xe thành công");
             }
-
-            if (_vehicleGroupRepository.GetById(userVehicleRequest.VehicleGroupId) == null)
+            catch (Exception e)
             {
-                return ResponseHelper<string>.ErrorResponse("vehicleGroupId", "Không tìm thấy loại xe");
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
             }
-
-            var newUserVehicle = new UserVehicle
-            {
-                Color = userVehicleRequest.Color,
-                UserId = userId,
-                VehicleGroupId = userVehicleRequest.VehicleGroupId,
-                EngineNumber = userVehicleRequest.EngineNumber,
-                PlateNumber = userVehicleRequest.PlateNumber,
-                ChassisNumber = userVehicleRequest.ChassisNumber,
-                Name = userVehicleRequest.Name,
-            };
-
-            _userVehicleRepository.Insert(newUserVehicle);
-            _userVehicleRepository.Save();
-            _fcmService.SendMessages(
-                new List<int> {userId},
-                FcmData.CreateFcmData("create_bike_success", new Dictionary<string, string> {{"status", "done"}}));
-            return ResponseHelper<string>.OkResponse(null, "Thêm xe thành công");
         }
 
         [HttpGet]

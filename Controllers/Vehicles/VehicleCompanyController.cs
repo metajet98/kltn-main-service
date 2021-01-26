@@ -30,13 +30,22 @@ namespace main_service.Controllers.Vehicles
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult Create([FromBody] VehicleCompanyRequest companyRequest)
         {
-            _companyRepository.Insert(new VehicleCompany
+            try
             {
-                Logo = companyRequest.Logo,
-                Name = companyRequest.Name
-            });
-            _companyRepository.Save();
-            return ResponseHelper<string>.OkResponse(null, "Thêm công ty thành công");
+                _companyRepository.Insert(new VehicleCompany
+                {
+                    Logo = companyRequest.Logo,
+                    Name = companyRequest.Name
+                });
+                _companyRepository.Save();
+                return ResponseHelper<string>.OkResponse(null, "Thêm công ty thành công");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
         
         [HttpDelete]

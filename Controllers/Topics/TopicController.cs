@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using main_service.Databases;
 using main_service.Extensions;
 using main_service.Helpers;
@@ -20,7 +19,8 @@ namespace main_service.Controllers.Topics
         private readonly NotificationsRepository _notificationsRepository;
         private readonly FcmService _fcmService;
 
-        public TopicController(TopicRepository topicRepository, FcmService fcmService, NotificationsRepository notificationsRepository)
+        public TopicController(TopicRepository topicRepository, FcmService fcmService,
+            NotificationsRepository notificationsRepository)
         {
             _topicRepository = topicRepository;
             _notificationsRepository = notificationsRepository;
@@ -31,13 +31,22 @@ namespace main_service.Controllers.Topics
         [Authorize(Roles = Constants.Role.User)]
         public JsonResult Create([FromBody] TopicRequest topicRequest)
         {
-            var userId = User.Identity.GetId();
-            var result = _topicRepository.CreateTopic(topicRequest, userId);
-            return result
-                ? ResponseHelper<dynamic>.OkResponse(null, "Tạo hỏi đáp thành công!")
-                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            try
+            {
+                var userId = User.Identity.GetId();
+                var result = _topicRepository.CreateTopic(topicRequest, userId);
+                return result
+                    ? ResponseHelper<dynamic>.OkResponse(null, "Tạo hỏi đáp thành công!")
+                    : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
-        
+
         [HttpGet]
         [Route("/api/topic")]
         [Authorize(Roles = Constants.Role.All)]
@@ -61,32 +70,41 @@ namespace main_service.Controllers.Topics
         [Authorize(Roles = Constants.Role.All)]
         public JsonResult PostReply(int id, [FromBody] TopicReplyRequest topicReplyRequest)
         {
-            var userId = User.Identity.GetId();
-            var topic = _topicRepository.GetById(id);
-            var result = _topicRepository.PostReply(topicReplyRequest, id, userId);
-
-            if (userId != topic.UserId)
+            try
             {
-                var data = FcmData.CreateFcmData("topic_reply", null);
-                var notify = FcmData.CreateFcmNotification(
-                    "Vừa có người trả lời topic của bạn", 
-                     "Topic của bạn vừa có một lượt trả lời, xem ngay tại trang hỏi đáp",
-                    null);
-                _fcmService.SendMessage(topic.UserId, data, notify);
-                _notificationsRepository.Insert(new Notification
-                {
-                    UserId = userId,
-                    Description = "Topic của bạn vừa có một lượt trả lời, xem ngay tại trang hỏi đáp",
-                    Title = "Vừa có người trả lời topic của bạn",
-                    Activity = "topic_reply",
-                    CreatedDate = DateTime.Now,
-                });
-                _notificationsRepository.Save();
-            }
+                var userId = User.Identity.GetId();
+                var topic = _topicRepository.GetById(id);
+                var result = _topicRepository.PostReply(topicReplyRequest, id, userId);
 
-            return result
-                ? ResponseHelper<dynamic>.OkResponse(null, "Trả lời thành công!")
-                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+                if (userId != topic.UserId)
+                {
+                    var data = FcmData.CreateFcmData("topic_reply", null);
+                    var notify = FcmData.CreateFcmNotification(
+                        "Vừa có người trả lời topic của bạn",
+                        "Topic của bạn vừa có một lượt trả lời, xem ngay tại trang hỏi đáp",
+                        null);
+                    _fcmService.SendMessage(topic.UserId, data, notify);
+                    _notificationsRepository.Insert(new Notification
+                    {
+                        UserId = userId,
+                        Description = "Topic của bạn vừa có một lượt trả lời, xem ngay tại trang hỏi đáp",
+                        Title = "Vừa có người trả lời topic của bạn",
+                        Activity = "topic_reply",
+                        CreatedDate = DateTime.Now,
+                    });
+                    _notificationsRepository.Save();
+                }
+
+                return result
+                    ? ResponseHelper<dynamic>.OkResponse(null, "Trả lời thành công!")
+                    : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
     }
 }

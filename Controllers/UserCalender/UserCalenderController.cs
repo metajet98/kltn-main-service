@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using main_service.Databases;
 using main_service.Extensions;
@@ -23,11 +24,20 @@ namespace main_service.Controllers.UserCalender
         [Authorize(Roles = Constants.Role.User)]
         public JsonResult Create([FromBody] UserCalenderRequest request)
         {
-            var userId = User.Identity.GetId();
-            var result = _userCalenderRepository.Create(request, userId);
-            return result
-                ? ResponseHelper<object>.OkResponse(null, "Đăng kí lịch thành công")
-                : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            try
+            {
+                var userId = User.Identity.GetId();
+                var result = _userCalenderRepository.Create(request, userId);
+                return result
+                    ? ResponseHelper<object>.OkResponse(null, "Đăng kí lịch thành công")
+                    : ResponseHelper<dynamic>.ErrorResponse(null, "Có lỗi xảy ra, vui lòng thử lại!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
         
         [HttpDelete]
@@ -35,9 +45,18 @@ namespace main_service.Controllers.UserCalender
         [Route("{id}")]
         public JsonResult Delete(int id)
         {
-            _userCalenderRepository.Delete(id);
-            _userCalenderRepository.Save();
-            return ResponseHelper<object>.OkResponse(null, "Xoá thành công");
+            try
+            {
+                _userCalenderRepository.Delete(id);
+                _userCalenderRepository.Save();
+                return ResponseHelper<object>.OkResponse(null, "Xoá thành công");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
         
         [HttpGet]

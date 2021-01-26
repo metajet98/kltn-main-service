@@ -30,12 +30,21 @@ namespace main_service.Controllers.Vehicles
         [Authorize(Roles = Role.CenterManager)]
         public JsonResult Create([FromBody] VehicleTypeRequest vehicleTypeRequest)
         {
-            _vehicleTypeRepository.Insert(new VehicleType
+            try
             {
-                TypeName = vehicleTypeRequest.TypeName
-            });
-            _vehicleTypeRepository.Save();
-            return ResponseHelper<string>.OkResponse(null, "Thêm thành công");
+                _vehicleTypeRepository.Insert(new VehicleType
+                {
+                    TypeName = vehicleTypeRequest.TypeName
+                });
+                _vehicleTypeRepository.Save();
+                return ResponseHelper<string>.OkResponse(null, "Thêm thành công");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                return ResponseHelper<string>.ErrorResponse(null,
+                    "Có lỗi xảy ra, vui lòng thử lại!");
+            }
         }
         
         [HttpDelete]
