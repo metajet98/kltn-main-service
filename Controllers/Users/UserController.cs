@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using main_service.Constants;
 using main_service.Databases;
 using main_service.Extensions;
@@ -31,6 +32,12 @@ namespace main_service.Controllers.Users
         {
             try
             {
+                var usersWithPhoneNumber = _userRepository.Get(x => x.PhoneNumber.Equals(userRequest.PhoneNumber));
+                if (usersWithPhoneNumber.Any())
+                {
+                    return ResponseHelper<string>.ErrorResponse(null,
+                        "Tài khoản với số điện thoại đã được đăng kí");
+                }
                 var newUser = new User
                 {
                     Address = userRequest.Address,
@@ -76,7 +83,7 @@ namespace main_service.Controllers.Users
         
         [HttpGet]
         [Route("{userId}")]
-        [Authorize(Roles = Constants.Role.CenterManager)]
+        [Authorize(Roles = Role.CenterManager)]
         public JsonResult Get(int userId)
         {
             var user = _userRepository.GetById(userId);
