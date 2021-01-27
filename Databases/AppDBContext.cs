@@ -163,6 +163,11 @@ namespace main_service.Databases
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("MAINTENANCE_USER_Id_fk_2");
 
+                entity.HasOne(d => d.Review)
+                    .WithMany(p => p.Maintenance)
+                    .HasForeignKey(d => d.ReviewId)
+                    .HasConstraintName("MAINTENANCE_REVIEW_Id_fk");
+
                 entity.HasOne(d => d.UserVehicle)
                     .WithMany(p => p.Maintenance)
                     .HasForeignKey(d => d.UserVehicleId)
@@ -286,11 +291,6 @@ namespace main_service.Databases
                 entity.HasIndex(e => e.Id)
                     .HasName("REVIEW_Id_uindex")
                     .IsUnique();
-
-                entity.HasOne(d => d.Maintenance)
-                    .WithMany(p => p.Review)
-                    .HasForeignKey(d => d.MaintenanceId)
-                    .HasConstraintName("REVIEW_MAINTENANCE_Id_fk");
             });
 
             modelBuilder.Entity<SparepartCheckDetail>(entity =>

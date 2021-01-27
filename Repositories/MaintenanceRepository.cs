@@ -52,7 +52,9 @@ namespace main_service.Repositories
                 .Include(x => x.UserVehicle)
                 .Include(x => x.MaintenanceBillDetail)
                 .Include(x => x.Branch)
+                .Include(x => x.Review)
                 .Include(x => x.ReceptionStaff)
+                .Include(x => x.MaintenanceImage)
                 .Include(x => x.MaintenanceStaff)
                 .Include(x => x.MaintenanceSchedule)
                 .Include(x => x.SparepartCheckDetail).ThenInclude(y => y.Status)
@@ -60,7 +62,7 @@ namespace main_service.Repositories
                 .FirstOrDefault(x => x.Id.Equals(maintenanceId));
             return result;
         }
-        
+
         public Maintenance GetMaintenanceForPdf(int maintenanceId)
         {
             var result = DbSet
@@ -326,15 +328,30 @@ namespace main_service.Repositories
             {
                 var maintenance = GetMaintenance(maintenanceId);
                 if (maintenance.UserVehicle.UserId != userId) return false;
+                if (maintenance.ReviewId != null)
+                {
+                    var review = Context.Review.FirstOrDefault(x => x.Id.Equals(maintenance.ReviewId));
+                    if (review == null) return false;
+                    review.Comment = request.Comment;
+                    review.Star = request.Star;
+                    Context.Review.Update(review);
+                    Context.SaveChanges();
+                    return true;
+                }
 
-                Context.Review.Add(new Review
+                var newReview = new Review
                 {
                     Comment = request.Comment,
                     Star = request.Star,
                     CreatedDate = DateTime.Now,
-                    MaintenanceId = maintenanceId,
                     UserId = userId
-                });
+                };
+
+                Context.Review.Add(newReview);
+                Context.SaveChanges();
+
+                maintenance.ReviewId = newReview.Id;
+                Context.Maintenance.Update(maintenance);
                 Context.SaveChanges();
                 return true;
             }

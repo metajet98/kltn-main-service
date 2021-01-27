@@ -13,7 +13,6 @@ namespace main_service.Databases
             MaintenanceBillDetail = new HashSet<MaintenanceBillDetail>();
             MaintenanceImage = new HashSet<MaintenanceImage>();
             MaintenanceSchedule = new HashSet<MaintenanceSchedule>();
-            Review = new HashSet<Review>();
             SparepartCheckDetail = new HashSet<SparepartCheckDetail>();
         }
 
@@ -33,6 +32,7 @@ namespace main_service.Databases
         public int Status { get; set; }
         public int MotorWash { get; set; }
         public bool? SparepartBack { get; set; }
+        public int? ReviewId { get; set; }
 
         [ForeignKey(nameof(BranchId))]
         [InverseProperty("Maintenance")]
@@ -43,6 +43,9 @@ namespace main_service.Databases
         [ForeignKey(nameof(ReceptionStaffId))]
         [InverseProperty(nameof(User.MaintenanceReceptionStaff))]
         public virtual User ReceptionStaff { get; set; }
+        [ForeignKey(nameof(ReviewId))]
+        [InverseProperty("Maintenance")]
+        public virtual Review Review { get; set; }
         [ForeignKey(nameof(UserVehicleId))]
         [InverseProperty("Maintenance")]
         public virtual UserVehicle UserVehicle { get; set; }
@@ -52,8 +55,6 @@ namespace main_service.Databases
         public virtual ICollection<MaintenanceImage> MaintenanceImage { get; set; }
         [InverseProperty("Maintenance")]
         public virtual ICollection<MaintenanceSchedule> MaintenanceSchedule { get; set; }
-        [InverseProperty("Maintenance")]
-        public virtual ICollection<Review> Review { get; set; }
         [InverseProperty("Maintenance")]
         public virtual ICollection<SparepartCheckDetail> SparepartCheckDetail { get; set; }
     }
