@@ -17,13 +17,21 @@ namespace main_service.Repositories
             try
             {
                 var tokenDb = DbSet.FirstOrDefault(x => x.Token.Equals(token) && x.UserId.Equals(userId));
-                if (tokenDb != null) return true;
-                DbSet.Add(new FcmToken
+                if (tokenDb != null)
                 {
-                    Token = token,
-                    UserId = userId,
-                    CreatedDate = DateTime.Now,
-                });
+                    tokenDb.Token = token;
+                    DbSet.Update(tokenDb);
+                }
+                else
+                {
+                    DbSet.Add(new FcmToken
+                    {
+                        Token = token,
+                        UserId = userId,
+                        CreatedDate = DateTime.Now,
+                    });
+                }
+
                 Context.SaveChanges();
                 return true;
             }
@@ -50,7 +58,7 @@ namespace main_service.Repositories
                 select token.Token;
             return query.ToList();
         }
-        
+
         public string GetToken(int userId)
         {
             var token = DbSet.FirstOrDefault(x => x.UserId.Equals(userId))?.Token;

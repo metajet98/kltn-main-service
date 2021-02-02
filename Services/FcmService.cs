@@ -34,26 +34,40 @@ namespace main_service.Services
 
         public async void SendMessages(List<int> userIds, Dictionary<string, string> data)
         {
-            var tokens = _fcmTokenRepository.GetTokens(userIds);
-            var messages = new MulticastMessage
+            try
             {
-                Tokens = tokens,
-                Data = data,
-                Notification = null,
-            };
-            var response = await FirebaseMessaging.DefaultInstance.SendMulticastAsync(messages);
+                var tokens = _fcmTokenRepository.GetTokens(userIds);
+                var messages = new MulticastMessage
+                {
+                    Tokens = tokens,
+                    Data = data,
+                    Notification = null,
+                };
+                var response = await FirebaseMessaging.DefaultInstance.SendMulticastAsync(messages);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
         
         public async void SendMessage(int userId, Dictionary<string, string> data, Notification notification)
         {
-            var token = _fcmTokenRepository.GetToken(userId);
-            var message = new Message
+            try
             {
-                Token = token,
-                Data = data,
-                Notification = notification,
-            };
-            var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+                var token = _fcmTokenRepository.GetToken(userId);
+                var message = new Message
+                {
+                    Token = token,
+                    Data = data,
+                    Notification = notification,
+                };
+                var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
     }
 }
