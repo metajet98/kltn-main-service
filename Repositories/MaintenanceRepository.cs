@@ -53,6 +53,7 @@ namespace main_service.Repositories
                 .Include(x => x.MaintenanceBillDetail)
                 .Include(x => x.Branch)
                 .Include(x => x.Review)
+                .Include(x => x.UserVehicle).ThenInclude(y => y.User)
                 .Include(x => x.ReceptionStaff)
                 .Include(x => x.MaintenanceImage)
                 .Include(x => x.MaintenanceStaff)
