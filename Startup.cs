@@ -1,6 +1,8 @@
+using System;
 using System.Text;
 using DinkToPdf;
 using DinkToPdf.Contracts;
+using main_service.CronJob;
 using main_service.Databases;
 using main_service.Repositories;
 using main_service.RestApi.Converters;
@@ -100,6 +102,12 @@ namespace main_service
             services.AddScoped<UserCalenderRepository>();
             services.AddScoped<NotificationsRepository>();
             services.AddScoped<StatisticRepository>();
+
+            services.AddCronJob<NotificationJob>(config =>
+            {
+                config.TimeZoneInfo = TimeZoneInfo.Local;
+                config.CronExpression = @"0 0 6 * *";
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

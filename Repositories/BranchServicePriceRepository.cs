@@ -48,7 +48,7 @@ namespace main_service.Repositories
 
         public void CreateOrUpdatePrice(int maintenanceServiceId, int newLaborCost, int newSparePartPrice, int branchId)
         {
-            var price = DbSet.FirstOrDefault(x => x.MaintenanceServiceId.Equals(maintenanceServiceId));
+            var price = DbSet.FirstOrDefault(x => x.MaintenanceServiceId.Equals(maintenanceServiceId) && x.BranchId.Equals(branchId));
             if (price != null)
             {
                 price.LaborCost = newLaborCost;
