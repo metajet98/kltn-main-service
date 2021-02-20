@@ -17,6 +17,8 @@ namespace main_service.Databases
         public int BranchId { get; set; }
         [Column(TypeName = "datetime")]
         public DateTime CreatedDate { get; set; }
+        public int? Status { get; set; }
+        public string? Review { get; set; }
 
         [ForeignKey(nameof(BranchId))]
         [InverseProperty("CustomerCalender")]
