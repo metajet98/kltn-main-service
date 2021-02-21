@@ -92,7 +92,9 @@ namespace main_service.Controllers.Maintenances
                     Description = x.MaintenanceService.Description,
                     LaborCost = x.LaborCost,
                     SparePartPrice = x.SparePartPrice,
-                    ServiceId = x.MaintenanceService.Id
+                    ServiceId = x.MaintenanceService.Id,
+                    WarrantyOdo = x.MaintenanceService.WarrantyOdo,
+                    WarrantyPeriod = x.MaintenanceService.WarrantyPeriod
                 }).ToList();
                 return ResponseHelper<IEnumerable<object>>.OkResponse(result);
             }
