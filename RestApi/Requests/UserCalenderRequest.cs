@@ -15,4 +15,10 @@ namespace main_service.RestApi.Requests
         public int? BranchId { get; set; }
         public DateTime? Date { get; set; } 
     }
+    
+    public class UserCalenderReview
+    {
+        public bool IsApprove { get; set; }
+        public string? Review { get; set; }
+    }
 }

@@ -71,7 +71,7 @@ namespace main_service.CronJob
                 var userCalenderMessages = userCalenders.Select(x => new
                 {
                     UserId = x.User.Id,
-                    Notidication = FcmData.CreateFcmNotification("Đến hẹn đã đặt", $"Bạn có một lịch hẹn đã đặt vào {x.Time.ToLongTimeString()}, hãy đến chi nhánh {x.Branch.Name} ngay", null),
+                    Notidication = FcmData.CreateFcmNotification("Đến hẹn đã đặt", $"Bạn có một lịch hẹn đã đặt vào {x.Time:dd/MM/yyyy HH:mm}, hãy đến chi nhánh {x.Branch.Name} ngay", null),
                 }).ToList();
                 
                 userCalenderMessages.ForEach(obj =>

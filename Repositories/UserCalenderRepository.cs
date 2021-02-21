@@ -78,5 +78,18 @@ namespace main_service.Repositories
 
             return query.ToList();
         }
+
+        public CustomerCalender? Review(int id, UserCalenderReview review)
+        {
+            var userCalender = DbSet
+                .FirstOrDefault(x => x.Id.Equals(id));
+            if (userCalender == null) return null;
+            userCalender.Review = review.Review;
+            userCalender.Status =
+                review.IsApprove ? Constants.CustomerCalender.Approved : Constants.CustomerCalender.Denied;
+            DbSet.Update(userCalender);
+            Context.SaveChanges();
+            return userCalender;
+        }
     }
 }
