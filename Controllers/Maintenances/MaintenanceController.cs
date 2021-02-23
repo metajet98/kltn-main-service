@@ -265,8 +265,8 @@ namespace main_service.Controllers.Maintenances
 
                 var result = _maintenanceRepository.FinishMaintenance(maintenanceId);
 
-                var maintenance = _maintenanceRepository.GetMaintenance(maintenanceId);
-                var userId = maintenance.UserVehicle.UserId;
+                var maintenance = _maintenanceRepository.Get(x => x.Id.Equals(maintenanceId), includeProperties: "UserVehicle").FirstOrDefault();
+                var userId = maintenance?.UserVehicle.UserId;
                 if (userId != null)
                 {
                     var data = FcmData.CreateFcmData("finish_maintenance", null);

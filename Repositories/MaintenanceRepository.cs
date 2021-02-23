@@ -48,20 +48,35 @@ namespace main_service.Repositories
 
         public Maintenance GetMaintenance(int maintenanceId)
         {
-            var result = DbSet
-                .Include(x => x.UserVehicle)
-                .Include(x => x.MaintenanceBillDetail)
-                .Include(x => x.Branch)
-                .Include(x => x.Review)
+            var query = DbSet.Where(x => x.Id.Equals(maintenanceId))
                 .Include(x => x.UserVehicle).ThenInclude(y => y.User)
-                .Include(x => x.ReceptionStaff)
-                .Include(x => x.MaintenanceImage)
-                .Include(x => x.MaintenanceStaff)
-                .Include(x => x.MaintenanceSchedule)
                 .Include(x => x.SparepartCheckDetail).ThenInclude(y => y.Status)
-                .Include(x => x.SparepartCheckDetail).ThenInclude(y => y.SparePartItem)
-                .FirstOrDefault(x => x.Id.Equals(maintenanceId));
-            return result;
+                .Include(x => x.SparepartCheckDetail).ThenInclude(y => y.SparePartItem);
+            
+            query.Select(x => x.UserVehicle).Load();
+            query.Select(x => x.MaintenanceBillDetail).Load();
+            query.Select(x => x.Branch).Load();
+            query.Select(x => x.Review).Load();
+            query.Select(x => x.ReceptionStaff).Load();
+            query.Select(x => x.MaintenanceImage).Load();
+            query.Select(x => x.MaintenanceStaff).Load();
+            query.Select(x => x.MaintenanceSchedule).Load();
+            
+            // var result = DbSet
+            //     .Where(x => x.Id.Equals(maintenanceId))
+            //     .Include(x => x.UserVehicle)
+            //     .Include(x => x.MaintenanceBillDetail)
+            //     .Include(x => x.Branch)
+            //     .Include(x => x.Review)
+            //     .Include(x => x.UserVehicle).ThenInclude(y => y.User)
+            //     .Include(x => x.ReceptionStaff)
+            //     .Include(x => x.MaintenanceImage)
+            //     .Include(x => x.MaintenanceStaff)
+            //     .Include(x => x.MaintenanceSchedule)
+            //     .Include(x => x.SparepartCheckDetail).ThenInclude(y => y.Status)
+            //     .Include(x => x.SparepartCheckDetail).ThenInclude(y => y.SparePartItem)
+            //     .FirstOrDefault();
+            return query.FirstOrDefault();
         }
 
         public Maintenance GetMaintenanceForPdf(int maintenanceId)
@@ -327,8 +342,10 @@ namespace main_service.Repositories
         {
             try
             {
-                var maintenance = GetMaintenance(maintenanceId);
-                if (maintenance.UserVehicle.UserId != userId) return false;
+                var maintenance = DbSet
+                    .Include(x => x.UserVehicle)
+                    .FirstOrDefault(x => x.Id.Equals(maintenanceId));
+                if (maintenance?.UserVehicle?.UserId != userId) return false;
                 if (maintenance.ReviewId != null)
                 {
                     var review = Context.Review.FirstOrDefault(x => x.Id.Equals(maintenance.ReviewId));
